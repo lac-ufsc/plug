@@ -1,0 +1,656 @@
+"""
+M. Mehl, H. J. Curran, W. J. Pitz, and C. K. Westbrook, 2009
+ ic8_ver3_mech.txt
+ from Marco Mehl 2009-12-11
+This version include the latest version of IC5 by H. J. Curran
+Website version
+LLNL-MI-421507
+Review and release date: December 16, 2009
+
+SURFACE MECHANISM FOR PARTIAL OXIDATION/REFORMING OF PROPANE AND
+ISOOCTANE OVER RHODIUM
+***********************************************************************
+****                                                                  *
+****     CPO C3H8/isoC8H18 ON RH - SURFACE MECHANISM                  *
+****                                                                  *
+****     Version 1.0, Januar  2010                                    *
+****     L. Maier, M. Hartmann, O. Deutschmann                        *
+****     KIT (Karlsruhe Institute of Technology)                      *
+****     Contact: mail@detchem.com (O. Deutschmann)                   *
+****                                                                  *
+****     References:                                                  *
+****     M. Hartmann, L. Maier, O. Deutschmann                        *
+****     Combustion and Flame, 157 (2010) 1771-1782.                  *
+****     www.detchem.com/mechanisms                                   *
+****                                                                  *
+****     Kinetic data:                                                *
+****      k = A * T**b * exp (-Ea/RT)         A          b       Ea   *
+****                                       (cm,mol,s)    -     kJ/mol *
+****                                                                  *
+****     STICK: A in next reaction is initial sticking coefficient    *
+****                                                                  *
+****                                                                  *
+****     (SURFACE CHEMKIN format)                                     *
+****                                                                  *
+***********************************************************************
+"""
+
+units(length='cm', time='s', quantity='mol', act_energy='cal/mol')
+
+ideal_gas(name='gas',
+          elements="C H N O Ar He Rh",
+          species="""H2      O2      C3H8    CH4     H2O     CO2     CO
+                     IC8H18  AR""",
+          reactions='gas-*',
+          transport='Mix',
+          initial_state=state(temperature=300.0, pressure=OneAtm))
+
+ideal_interface(name='Rh_surface',
+                elements="C H N O Ar He Rh",
+                species="""_Rh_     H2O_Rh   H_Rh     OH_Rh    CO_Rh    C_Rh
+                          CH3_Rh   CH2_Rh   CH_Rh    CH4_Rh   O_Rh     CO2_Rh
+                          HCO_Rh   C3H8_Rh  C3H7_Rh  C3H6_Rh  C2H3_Rh""",
+                site_density=2.72e-09,
+                phases="gas",
+          reactions='Rh_surface-*',
+                initial_state=state(temperature=300.0, pressure=OneAtm))
+
+#-------------------------------------------------------------------------------
+# Species data
+#-------------------------------------------------------------------------------
+
+species(name='H2',
+        atoms='H:2',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 3.29812400E+00,  8.24944200E-04, -8.14301500E-07,
+                      -9.47543400E-11,  4.13487200E-13, -1.01252100E+03,
+                      -3.29409400E+00]),
+                NASA([1000.00, 5000.00],
+                     [ 2.99142300E+00,  7.00064400E-04, -5.63382900E-08,
+                      -9.23157800E-12,  1.58275200E-15, -8.35034000E+02,
+                      -1.35511000E+00])),
+        transport=gas_transport(geom='linear',
+                                diam=2.92,
+                                well_depth=38.0,
+                                polar=0.79,
+                                rot_relax=280.0),
+        note='121286')
+
+species(name='O2',
+        atoms='O:2',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 3.21293600E+00,  1.12748600E-03, -5.75615000E-07,
+                       1.31387700E-09, -8.76855400E-13, -1.00524900E+03,
+                       6.03473800E+00]),
+                NASA([1000.00, 5000.00],
+                     [ 3.69757800E+00,  6.13519700E-04, -1.25884200E-07,
+                       1.77528100E-11, -1.13643500E-15, -1.23393000E+03,
+                       3.18916600E+00])),
+        transport=gas_transport(geom='linear',
+                                diam=3.458,
+                                well_depth=107.4,
+                                polar=1.6,
+                                rot_relax=3.8),
+        note='121386')
+
+species(name='C3H8',
+        atoms='C:3 H:8',
+        thermo=(NASA([300.00, 1387.00],
+                     [-3.08230087E-01,  3.65331801E-02, -1.97610926E-05,
+                       5.15283344E-09, -5.06336649E-13, -1.39792198E+04,
+                       2.40478733E+01]),
+                NASA([1387.00, 5000.00],
+                     [ 9.31450083E+00,  1.73577154E-02, -5.94222386E-06,
+                       9.22939762E-10, -5.35576604E-14, -1.77234234E+04,
+                      -2.89241517E+01])),
+        transport=gas_transport(geom='nonlinear',
+                                diam=4.81,
+                                well_depth=303.4,
+                                rot_relax=1.0),
+        note='8/4/4THERM')
+
+species(name='CH4',
+        atoms='H:4 C:1',
+        thermo=(NASA([300.00, 1462.00],
+                     [ 3.72113020E+00, -2.50293289E-03,  1.90246534E-05,
+                      -1.46871253E-08,  3.43791152E-12, -1.01424099E+04,
+                       1.22776596E+00]),
+                NASA([1462.00, 5000.00],
+                     [ 4.09617653E+00,  7.44330845E-03, -2.63871900E-06,
+                       4.19577604E-10, -2.47508050E-14, -1.13835704E+04,
+                      -4.67561383E+00])),
+        transport=gas_transport(geom='nonlinear',
+                                diam=3.746,
+                                well_depth=141.4,
+                                polar=2.6,
+                                rot_relax=13.0),
+        note='29/11/04')
+
+species(name='H2O',
+        atoms='H:2 O:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 3.38684200E+00,  3.47498200E-03, -6.35469600E-06,
+                       6.96858100E-09, -2.50658800E-12, -3.02081100E+04,
+                       2.59023300E+00]),
+                NASA([1000.00, 5000.00],
+                     [ 2.67214600E+00,  3.05629300E-03, -8.73026000E-07,
+                       1.20099600E-10, -6.39161800E-15, -2.98992100E+04,
+                       6.86281700E+00])),
+        transport=gas_transport(geom='nonlinear',
+                                diam=2.605,
+                                well_depth=572.4,
+                                dipole=1.844,
+                                rot_relax=4.0),
+        note='20387')
+
+species(name='CO2',
+        atoms='C:1 O:2',
+        thermo=(NASA([300.00, 1380.00],
+                     [ 2.57930490E+00,  8.24684987E-03, -6.42716047E-06,
+                       2.54637024E-09, -4.12030443E-13, -4.84162830E+04,
+                       8.81141041E+00]),
+                NASA([1380.00, 5000.00],
+                     [ 5.18953018E+00,  2.06006476E-03, -7.33575324E-07,
+                       1.17004374E-10, -6.91729215E-15, -4.93178953E+04,
+                      -5.18289303E+00])),
+        transport=gas_transport(geom='linear',
+                                diam=3.763,
+                                well_depth=244.0,
+                                polar=2.65,
+                                rot_relax=2.1),
+        note='29/11/04')
+
+species(name='CO',
+        atoms='C:1 O:1',
+        thermo=(NASA([300.00, 1429.00],
+                     [ 3.19036352E+00,  8.94419972E-04, -3.24927563E-08,
+                      -1.04599967E-10,  2.41965693E-14, -1.42869054E+04,
+                       5.33277914E+00]),
+                NASA([1429.00, 5000.00],
+                     [ 3.11216890E+00,  1.15948283E-03, -3.38480362E-07,
+                       4.41403098E-11, -2.12862228E-15, -1.42718539E+04,
+                       5.71725177E+00])),
+        transport=gas_transport(geom='linear',
+                                diam=3.65,
+                                well_depth=98.1,
+                                polar=1.95,
+                                rot_relax=1.8),
+        note='29/11/04')
+
+species(name='IC8H18',
+        atoms='C:8 H:18',
+        thermo=(NASA([300.00, 1396.00],
+                     [-4.20868893E+00,  1.11440581E-01, -7.91346582E-05,
+                       2.92406242E-08, -4.43743191E-12, -2.99446875E+04,
+                       4.49521701E+01]),
+                NASA([1396.00, 5000.00],
+                     [ 2.71373590E+01,  3.79004890E-02, -1.29437358E-05,
+                       2.00760372E-09, -1.16400580E-13, -4.07958177E+04,
+                      -1.23277495E+02])),
+        transport=gas_transport(geom='nonlinear',
+                                diam=6.414,
+                                well_depth=458.5,
+                                rot_relax=1.0),
+        note='7/20/0THERM')
+
+species(name='AR',
+        atoms='Ar:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 2.50000000E+00,  0.00000000E+00,  0.00000000E+00,
+                       0.00000000E+00,  0.00000000E+00, -7.45375000E+02,
+                       4.36600100E+00]),
+                NASA([1000.00, 5000.00],
+                     [ 2.50000000E+00,  0.00000000E+00,  0.00000000E+00,
+                       0.00000000E+00,  0.00000000E+00, -7.45375000E+02,
+                       4.36600100E+00])),
+        transport=gas_transport(geom='atom',
+                                diam=3.33,
+                                well_depth=136.5),
+        note='120186')
+
+species(name='_Rh_',
+        atoms='Rh:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 0.00000000E+00,  0.00000000E+00,  0.00000000E+00,
+                       0.00000000E+00,  0.00000000E+00,  0.00000000E+00,
+                       0.00000000E+00]),
+                NASA([1000.00, 3000.00],
+                     [ 0.00000000E+00,  0.00000000E+00,  0.00000000E+00,
+                       0.00000000E+00,  0.00000000E+00,  0.00000000E+00,
+                       0.00000000E+00])))
+
+species(name='H2O_Rh',
+        atoms='O:1 H:2 Rh:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [-2.76515530E+00,  1.33151150E-02,  1.01276950E-06,
+                      -7.18200830E-09,  2.28137760E-12, -3.63980550E+04,
+                       1.20981450E+01]),
+                NASA([1000.00, 3000.00],
+                     [ 2.58030510E+00,  4.95708270E-03, -4.68940560E-07,
+                      -5.26331370E-10,  1.19983220E-13, -3.83022340E+04,
+                      -1.74063220E+01])),
+        note='92491')
+
+species(name='H_Rh',
+        atoms='H:1 Rh:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [-1.30298770E+00,  5.41731990E-03,  3.12779720E-07,
+                      -3.23285330E-09,  1.13628200E-12, -4.22770750E+03,
+                       5.87432380E+00]),
+                NASA([1000.00, 3000.00],
+                     [ 1.06969960E+00,  1.54322300E-03, -1.55009220E-07,
+                      -1.65731650E-10,  3.83593470E-14, -5.05461280E+03,
+                      -7.15552380E+00])),
+        note='92491')
+
+species(name='OH_Rh',
+        atoms='O:1 H:1 Rh:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [-2.03408810E+00,  9.36626830E-03,  6.62752140E-07,
+                      -5.20748870E-09,  1.70887350E-12, -2.53199490E+04,
+                       8.98631860E+00]),
+                NASA([1000.00, 3000.00],
+                     [ 1.82499730E+00,  3.25015650E-03, -3.11975410E-07,
+                      -3.46032060E-10,  7.91714720E-14, -2.66854920E+04,
+                      -1.22808910E+01])),
+        note='92491')
+
+species(name='CO_Rh',
+        atoms='C:1 O:1 Rh:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 4.89074660E+00,  6.81342350E-05,  1.97688140E-07,
+                       1.23886690E-09, -9.03392490E-13, -3.22978360E+04,
+                      -1.74531610E+01]),
+                NASA([1000.00, 3000.00],
+                     [ 4.70837780E+00,  9.60372970E-04, -1.18052790E-07,
+                      -7.68838260E-11,  1.82320000E-14, -3.23117230E+04,
+                      -1.67195930E+01])),
+        note='0')
+
+species(name='C_Rh',
+        atoms='C:1 Rh:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 5.89240190E-01,  2.50128420E-03, -3.42294980E-07,
+                      -1.89943460E-09,  1.01904060E-12,  1.02369230E+04,
+                       2.19370170E+00]),
+                NASA([1000.00, 3000.00],
+                     [ 1.57928240E+00,  3.65287010E-04, -5.06576720E-08,
+                      -3.48848550E-11,  8.80896990E-15,  9.95357520E+03,
+                      -3.02404950E+00])),
+        note='0')
+
+species(name='CH3_Rh',
+        atoms='C:1 H:3 Rh:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 1.29192170E+00,  7.26756030E-03,  9.81794760E-07,
+                      -2.04712940E-09,  9.08327170E-14, -2.57456100E+03,
+                      -1.19830370E+00]),
+                NASA([1000.00, 3000.00],
+                     [ 3.00161650E+00,  5.40845050E-03, -4.05380580E-07,
+                      -5.34224660E-10,  1.14518870E-13, -3.27527220E+03,
+                      -1.09659840E+01])),
+        note='0')
+
+species(name='CH2_Rh',
+        atoms='C:1 H:2 Rh:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [-1.48764040E-01,  5.13962890E-03,  1.12110750E-06,
+                      -8.27554520E-10, -4.45723450E-13,  1.08787000E+04,
+                       5.74518820E+00]),
+                NASA([1000.00, 3000.00],
+                     [ 7.40761220E-01,  4.80325330E-03, -3.28256330E-07,
+                      -4.77797860E-10,  1.00734520E-13,  1.04437520E+04,
+                       4.08420860E-01])),
+        note='0')
+
+species(name='CH_Rh',
+        atoms='C:1 H:1 Rh:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 8.41574850E-01,  1.30953800E-03,  2.84645750E-07,
+                       6.38629040E-10, -4.27666580E-13,  2.23328010E+04,
+                       1.14523050E+00]),
+                NASA([1000.00, 3000.00],
+                     [-4.82424720E-03,  3.04462390E-03, -1.60660990E-07,
+                      -2.90417000E-10,  5.79999240E-14,  2.25952190E+04,
+                       5.66778180E+00])),
+        note='0')
+
+species(name='CH4_Rh',
+        atoms='C:1 H:4 Rh:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 1.29192170E+00,  7.26756030E-03,  9.81794760E-07,
+                      -2.04712940E-09,  9.08327170E-14, -2.57456100E+03,
+                      -1.19830370E+00]),
+                NASA([1000.00, 3000.00],
+                     [ 3.00161650E+00,  5.40845050E-03, -4.05380580E-07,
+                      -5.34224660E-10,  1.14518870E-13, -3.27527220E+03,
+                      -1.09659840E+01])),
+        note='0')
+
+species(name='O_Rh',
+        atoms='O:1 Rh:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [-9.49869040E-01,  7.40423050E-03, -1.04514240E-06,
+                      -6.11204200E-09,  3.37879920E-12, -1.32099120E+04,
+                       3.61379050E+00]),
+                NASA([1000.00, 3000.00],
+                     [ 1.94541800E+00,  9.17616470E-04, -1.12267190E-07,
+                      -9.90996240E-11,  2.43076990E-14, -1.40051870E+04,
+                      -1.15316630E+01])),
+        note='92491')
+
+species(name='CO2_Rh',
+        atoms='C:1 O:2 Rh:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 4.69000000E-01,  6.26620000E-03,  0.00000000E+00,
+                       0.00000000E+00,  0.00000000E+00, -5.04587000E+04,
+                      -4.55500000E+00]),
+                NASA([1000.00, 3000.00],
+                     [ 4.69000000E-01,  6.26600000E-03,  0.00000000E+00,
+                       0.00000000E+00,  0.00000000E+00, -5.04587000E+04,
+                      -4.55500000E+00])),
+        note='081292')
+
+species(name='HCO_Rh',
+        atoms='C:1 H:1 O:1 Rh:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 1.29192170E+00,  7.26756030E-03,  9.81794760E-07,
+                      -2.04712940E-09,  9.08327170E-14, -2.57456100E+03,
+                      -1.19830370E+00]),
+                NASA([1000.00, 3000.00],
+                     [ 3.00161650E+00,  5.40845050E-03, -4.05380580E-07,
+                      -5.34224660E-10,  1.14518870E-13, -3.27527220E+03,
+                      -1.09659840E+01])))
+
+species(name='C3H8_Rh',
+        atoms='C:3 H:8 Rh:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 1.29192170E+00,  7.26756030E-03,  9.81794760E-07,
+                      -2.04712940E-09,  9.08327170E-14, -2.57456100E+03,
+                      -1.19830370E+00]),
+                NASA([1000.00, 3000.00],
+                     [ 3.00161650E+00,  5.40845050E-03, -4.05380580E-07,
+                      -5.34224660E-10,  1.14518870E-13, -3.27527220E+03,
+                      -1.09659840E+01])),
+        note='0')
+
+species(name='C3H7_Rh',
+        atoms='C:3 H:7 Rh:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 1.29192170E+00,  7.26756030E-03,  9.81794760E-07,
+                      -2.04712940E-09,  9.08327170E-14, -2.57456100E+03,
+                      -1.19830370E+00]),
+                NASA([1000.00, 3000.00],
+                     [ 3.00161650E+00,  5.40845050E-03, -4.05380580E-07,
+                      -5.34224660E-10,  1.14518870E-13, -3.27527220E+03,
+                      -1.09659840E+01])),
+        note='0')
+
+species(name='C3H6_Rh',
+        atoms='C:3 H:6 Rh:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 1.29192170E+00,  7.26756030E-03,  9.81794760E-07,
+                      -2.04712940E-09,  9.08327170E-14, -2.57456100E+03,
+                      -1.19830370E+00]),
+                NASA([1000.00, 3000.00],
+                     [ 3.00161650E+00,  5.40845050E-03, -4.05380580E-07,
+                      -5.34224660E-10,  1.14518870E-13, -3.27527220E+03,
+                      -1.09659840E+01])),
+        note='0')
+
+species(name='C2H3_Rh',
+        atoms='C:2 H:3 Rh:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 1.29192170E+00,  7.26756030E-03,  9.81794760E-07,
+                      -2.04712940E-09,  9.08327170E-14, -2.57456100E+03,
+                      -1.19830370E+00]),
+                NASA([1000.00, 3000.00],
+                     [ 3.00161650E+00,  5.40845050E-03, -4.05380580E-07,
+                      -5.34224660E-10,  1.14518870E-13, -3.27527220E+03,
+                      -1.09659840E+01])),
+        note='0')
+
+#-------------------------------------------------------------------------------
+# Reaction data
+#-------------------------------------------------------------------------------
+disable_motz_wise()
+
+# Rh_surface Reaction 1
+surface_reaction('H2 + _Rh_ + _Rh_ => H_Rh + H_Rh', stick(1.000000e-02, 0.0, (0.0, 'J/mol')),
+                 id='Rh_surface-1')
+
+# Rh_surface Reaction 2
+surface_reaction('O2 + _Rh_ + _Rh_ => O_Rh + O_Rh', stick(1.000000e-02, 0.0, (0.0, 'J/mol')),
+                 id='Rh_surface-2')
+
+# Rh_surface Reaction 3
+surface_reaction('C3H8 + _Rh_ => C3H8_Rh', stick(5.800000e-03, 0.0, (0.0, 'J/mol')),
+                 id='Rh_surface-3')
+
+# Rh_surface Reaction 4
+surface_reaction('CH4 + _Rh_ => CH4_Rh', stick(8.000000e-03, 0.0, (0.0, 'J/mol')),
+                 id='Rh_surface-4')
+
+# Rh_surface Reaction 5
+surface_reaction('H2O + _Rh_ => H2O_Rh', stick(1.000000e-01, 0.0, (0.0, 'J/mol')),
+                 id='Rh_surface-5')
+
+# Rh_surface Reaction 6
+surface_reaction('CO2 + _Rh_ => CO2_Rh', stick(1.000000e-05, 0.0, (0.0, 'J/mol')),
+                 id='Rh_surface-6')
+
+# Rh_surface Reaction 7
+surface_reaction('CO + _Rh_ => CO_Rh', stick(5.000000e-01, 0.0, (0.0, 'J/mol')),
+                 id='Rh_surface-7')
+
+# Rh_surface Reaction 8
+surface_reaction('H_Rh + H_Rh => _Rh_ + _Rh_ + H2', [3.000000e+21, 0.0, (77800.0, 'J/mol')],
+                 id='Rh_surface-8')
+
+# Rh_surface Reaction 9
+surface_reaction('O_Rh + O_Rh => _Rh_ + _Rh_ + O2',
+                 Arrhenius(1.300000e+22, 0.0, (355200.0, 'J/mol'),
+                           coverage=[['O_Rh', 0.0, 0.0, (-280000.0, 'J/mol')]]),
+                 id='Rh_surface-9')
+
+# Rh_surface Reaction 10
+surface_reaction('H2O_Rh => _Rh_ + H2O', [3.000000e+13, 0.0, (45000.0, 'J/mol')],
+                 id='Rh_surface-10')
+
+# Rh_surface Reaction 11
+surface_reaction('CO_Rh => _Rh_ + CO',
+                 Arrhenius(3.500000e+13, 0.0, (133400.0, 'J/mol'),
+                           coverage=[['CO_Rh', 0.0, 0.0, (-15000.0, 'J/mol')]]),
+                 id='Rh_surface-11')
+
+# Rh_surface Reaction 12
+surface_reaction('CO2_Rh => _Rh_ + CO2', [1.000000e+13, 0.0, (21700.0, 'J/mol')],
+                 id='Rh_surface-12')
+
+# Rh_surface Reaction 13
+surface_reaction('C3H8_Rh => _Rh_ + C3H8', [1.000000e+13, 0.0, (30100.0, 'J/mol')],
+                 id='Rh_surface-13')
+
+# Rh_surface Reaction 14
+surface_reaction('CH4_Rh => _Rh_ + CH4', [1.000000e+13, 0.0, (25100.0, 'J/mol')],
+                 id='Rh_surface-14')
+
+# Rh_surface Reaction 15
+surface_reaction('O_Rh + H_Rh => OH_Rh + _Rh_', [5.000000e+22, 0.0, (83700.0, 'J/mol')],
+                 id='Rh_surface-15')
+
+# Rh_surface Reaction 16
+surface_reaction('OH_Rh + _Rh_ => O_Rh + H_Rh', [3.000000e+20, 0.0, (37700.0, 'J/mol')],
+                 id='Rh_surface-16')
+
+# Rh_surface Reaction 17
+surface_reaction('OH_Rh + H_Rh => H2O_Rh + _Rh_', [3.000000e+20, 0.0, (33500.0, 'J/mol')],
+                 id='Rh_surface-17')
+
+# Rh_surface Reaction 18
+surface_reaction('H2O_Rh + _Rh_ => OH_Rh + H_Rh', [5.000000e+22, 0.0, (106400.0, 'J/mol')],
+                 id='Rh_surface-18')
+
+# Rh_surface Reaction 19
+surface_reaction('OH_Rh + OH_Rh => O_Rh + H2O_Rh', [3.000000e+21, 0.0, (100800.0, 'J/mol')],
+                 id='Rh_surface-19')
+
+# Rh_surface Reaction 20
+surface_reaction('O_Rh + H2O_Rh => OH_Rh + OH_Rh', [3.000000e+21, 0.0, (171800.0, 'J/mol')],
+                 id='Rh_surface-20')
+
+# Rh_surface Reaction 21
+surface_reaction('O_Rh + C_Rh => CO_Rh + _Rh_', [5.200000e+23, 0.0, (97900.0, 'J/mol')],
+                 id='Rh_surface-21')
+
+# Rh_surface Reaction 22
+surface_reaction('CO_Rh + _Rh_ => O_Rh + C_Rh', [2.500000e+21, 0.0, (169000.0, 'J/mol')],
+                 id='Rh_surface-22')
+
+# Rh_surface Reaction 23
+surface_reaction('O_Rh + CO_Rh => CO2_Rh + _Rh_', [5.500000e+18, 0.0, (121600.0, 'J/mol')],
+                 id='Rh_surface-23')
+
+# Rh_surface Reaction 24
+surface_reaction('CO2_Rh + _Rh_ => O_Rh + CO_Rh', [3.000000e+21, 0.0, (115300.0, 'J/mol')],
+                 id='Rh_surface-24')
+
+# Rh_surface Reaction 25
+surface_reaction('CO_Rh + H_Rh => HCO_Rh + _Rh_', [5.000000e+19, 0.0, (108900.0, 'J/mol')],
+                 id='Rh_surface-25')
+
+# Rh_surface Reaction 26
+surface_reaction('HCO_Rh + _Rh_ => CO_Rh + H_Rh',
+                 Arrhenius(3.700000e+21, 0.0, (0.0, 'J/mol'),
+                           coverage=[['CO_Rh', 0.0, 0.0, (50000.0, 'J/mol')]]),
+                 id='Rh_surface-26')
+
+# Rh_surface Reaction 27
+surface_reaction('HCO_Rh + _Rh_ => O_Rh + CH_Rh', [3.700000e+24, 0.0, (59500.0, 'J/mol')],
+                 id='Rh_surface-27')
+
+# Rh_surface Reaction 28
+surface_reaction('O_Rh + CH_Rh => HCO_Rh + _Rh_', [3.700000e+21, 0.0, (167500.0, 'J/mol')],
+                 id='Rh_surface-28')
+
+# Rh_surface Reaction 29
+surface_reaction('C3H8_Rh + _Rh_ => C3H7_Rh + H_Rh', [3.700000e+21, 0.0, (55000.0, 'J/mol')],
+                 id='Rh_surface-29')
+
+# Rh_surface Reaction 30
+surface_reaction('C3H7_Rh + H_Rh => C3H8_Rh + _Rh_', [3.700000e+21, 0.0, (56600.0, 'J/mol')],
+                 id='Rh_surface-30')
+
+# Rh_surface Reaction 31
+surface_reaction('C3H7_Rh + _Rh_ => C3H6_Rh + H_Rh', [3.700000e+24, 0.0, (73400.0, 'J/mol')],
+                 id='Rh_surface-31')
+
+# Rh_surface Reaction 32
+surface_reaction('C3H6_Rh + H_Rh => C3H7_Rh + _Rh_', [3.700000e+21, 0.0, (75900.0, 'J/mol')],
+                 id='Rh_surface-32')
+
+# Rh_surface Reaction 33
+surface_reaction('C3H8_Rh + O_Rh => C3H7_Rh + OH_Rh', [1.700000e+24, 0.0, (71500.0, 'J/mol')],
+                 id='Rh_surface-33')
+
+# Rh_surface Reaction 34
+surface_reaction('C3H7_Rh + OH_Rh => C3H8_Rh + O_Rh', [3.700000e+21, 0.0, (31300.0, 'J/mol')],
+                 id='Rh_surface-34')
+
+# Rh_surface Reaction 35
+surface_reaction('C3H7_Rh + O_Rh => C3H6_Rh + OH_Rh', [3.700000e+24, 0.0, (88700.0, 'J/mol')],
+                 id='Rh_surface-35')
+
+# Rh_surface Reaction 36
+surface_reaction('C3H6_Rh + OH_Rh => C3H7_Rh + O_Rh', [3.700000e+21, 0.0, (45300.0, 'J/mol')],
+                 id='Rh_surface-36')
+
+# Rh_surface Reaction 37
+surface_reaction('C3H6_Rh + _Rh_ => C2H3_Rh + CH3_Rh', [3.700000e+24, 0.0, (83700.0, 'J/mol')],
+                 id='Rh_surface-37')
+
+# Rh_surface Reaction 38
+surface_reaction('C2H3_Rh + CH3_Rh => C3H6_Rh + _Rh_', [3.700000e+21, 0.0, (55800.0, 'J/mol')],
+                 id='Rh_surface-38')
+
+# Rh_surface Reaction 39
+surface_reaction('C2H3_Rh + _Rh_ => CH3_Rh + C_Rh', [3.700000e+21, 0.0, (35600.0, 'J/mol')],
+                 id='Rh_surface-39')
+
+# Rh_surface Reaction 40
+surface_reaction('CH3_Rh + C_Rh => C2H3_Rh + _Rh_', [3.700000e+21, 0.0, (118700.0, 'J/mol')],
+                 id='Rh_surface-40')
+
+# Rh_surface Reaction 41
+surface_reaction('CH4_Rh + _Rh_ => CH3_Rh + H_Rh', [3.700000e+21, 0.0, (61000.0, 'J/mol')],
+                 id='Rh_surface-41')
+
+# Rh_surface Reaction 42
+surface_reaction('CH3_Rh + H_Rh => CH4_Rh + _Rh_', [3.700000e+21, 0.0, (51000.0, 'J/mol')],
+                 id='Rh_surface-42')
+
+# Rh_surface Reaction 43
+surface_reaction('CH3_Rh + _Rh_ => CH2_Rh + H_Rh', [3.700000e+24, 0.0, (103000.0, 'J/mol')],
+                 id='Rh_surface-43')
+
+# Rh_surface Reaction 44
+surface_reaction('CH2_Rh + H_Rh => CH3_Rh + _Rh_', [3.700000e+23, 0.0, (44000.0, 'J/mol')],
+                 id='Rh_surface-44')
+
+# Rh_surface Reaction 45
+surface_reaction('CH2_Rh + _Rh_ => CH_Rh + H_Rh', [3.700000e+24, 0.0, (100000.0, 'J/mol')],
+                 id='Rh_surface-45')
+
+# Rh_surface Reaction 46
+surface_reaction('CH_Rh + H_Rh => CH2_Rh + _Rh_', [3.700000e+21, 0.0, (68000.0, 'J/mol')],
+                 id='Rh_surface-46')
+
+# Rh_surface Reaction 47
+surface_reaction('CH_Rh + _Rh_ => C_Rh + H_Rh', [3.700000e+21, 0.0, (21000.0, 'J/mol')],
+                 id='Rh_surface-47')
+
+# Rh_surface Reaction 48
+surface_reaction('C_Rh + H_Rh => CH_Rh + _Rh_', [3.700000e+21, 0.0, (172800.0, 'J/mol')],
+                 id='Rh_surface-48')
+
+# Rh_surface Reaction 49
+surface_reaction('O_Rh + CH4_Rh => CH3_Rh + OH_Rh', [1.700000e+24, 0.0, (80340.0, 'J/mol')],
+                 id='Rh_surface-49')
+
+# Rh_surface Reaction 50
+surface_reaction('CH3_Rh + OH_Rh => O_Rh + CH4_Rh', [3.700000e+21, 0.0, (24270.0, 'J/mol')],
+                 id='Rh_surface-50')
+
+# Rh_surface Reaction 51
+surface_reaction('O_Rh + CH3_Rh => CH2_Rh + OH_Rh', [3.700000e+24, 0.0, (120310.0, 'J/mol')],
+                 id='Rh_surface-51')
+
+# Rh_surface Reaction 52
+surface_reaction('CH2_Rh + OH_Rh => O_Rh + CH3_Rh', [3.700000e+21, 0.0, (15060.0, 'J/mol')],
+                 id='Rh_surface-52')
+
+# Rh_surface Reaction 53
+surface_reaction('O_Rh + CH2_Rh => CH_Rh + OH_Rh', [3.700000e+24, 0.0, (114500.0, 'J/mol')],
+                 id='Rh_surface-53')
+
+# Rh_surface Reaction 54
+surface_reaction('CH_Rh + OH_Rh => O_Rh + CH2_Rh', [3.700000e+21, 0.0, (36820.0, 'J/mol')],
+                 id='Rh_surface-54')
+
+# Rh_surface Reaction 55
+surface_reaction('O_Rh + CH_Rh => C_Rh + OH_Rh', [3.700000e+21, 0.0, (30130.0, 'J/mol')],
+                 id='Rh_surface-55')
+
+# Rh_surface Reaction 56
+surface_reaction('C_Rh + OH_Rh => O_Rh + CH_Rh', [3.700000e+21, 0.0, (136000.0, 'J/mol')],
+                 id='Rh_surface-56')
+
+# Rh_surface Reaction 57
+surface_reaction('IC8H18 + 26 _Rh_ => 8 C_Rh + 18 H_Rh', [4.714000e+07, 0.13, (6000.0, 'J/mol')],
+                 order='IC8H18:0.6 _Rh_:1.008',
+                 id='Rh_surface-57')
+
+# Rh_surface Reaction 58
+surface_reaction('IC8H18 + 8 O_Rh + 18 _Rh_ => 8 CO_Rh + 18 H_Rh', [7.730000e+11, 1.0, (50000.0, 'J/mol')],
+                 order='O_Rh:1. _Rh_:1.01',
+                 id='Rh_surface-58')

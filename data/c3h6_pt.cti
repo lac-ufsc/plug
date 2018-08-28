@@ -1,0 +1,776 @@
+"""
+SURFACE MECHANISM FOR PT-CATALYZED ABATMENT OF AUTOMOTIVE EXHAUST GASES
+***********************************************************************
+****                                                                  *
+****      C3H6/CH4/NOx/CO ON PT - SURFACE MECHANISM                   *
+****                                                                  *
+****     J. Koop, O. Deutschmann                                      *
+****     KIT (Karlsruhe Institute of Technology)                      *
+****                                                                  *
+****     Reference:                                                   *
+****     J. Koop, O. Deutschmann                                      *
+****     Appl. Catal.B: Environmental 91 (2009), 47-58                *
+****     Contact: mail@detchem.com (O. Deutschmann)                   *
+****     www.detchem.com/mechanisms                                   *
+****                                                                  *
+****     Kinetic data:                                                *
+****      k = A * T**b * exp (-Ea/RT)         A          b       Ea   *
+****                                       (cm,mol,s)    -     kJ/mol *
+****                                                                  *
+****     STICK: A in next reaction is initial sticking coefficient    *
+****                                                                  *
+****                                                                  *
+****     (SURFACE CHEMKIN format)                                     *
+****                                                                  *
+***********************************************************************
+"""
+
+units(length='cm', time='s', quantity='mol', act_energy='cal/mol')
+
+ideal_gas(name='gas',
+          elements="C H O N Pt",
+          species="""C3H6  CO    CO2   H2    H2O   N2    N2O   NO    NO2
+                     O2""",
+          reactions='gas-*',
+          transport='Mix',
+          initial_state=state(temperature=300.0, pressure=OneAtm))
+
+ideal_interface(name='PT_SURFACE',
+                elements="C H O N Pt",
+                species="""_Pt_      NO_Pt     O_Pt      N_Pt      H_Pt
+                          H2O_Pt    CO_Pt     CO2_Pt    C3H5_Pt   C3H6_Pt
+                          C_Pt      CH_Pt     CH2_Pt    CH3_Pt    C2H3_Pt
+                          OH_Pt     CH3CO_Pt  C3H5_Pt1  C3H4_Pt1  NO2_Pt
+                          N2O_Pt    HCOO_Pt""",
+                site_density=2.72e-09,
+                phases="gas",
+          reactions='PT_SURFACE-*',
+                initial_state=state(temperature=300.0, pressure=OneAtm))
+
+#-------------------------------------------------------------------------------
+# Species data
+#-------------------------------------------------------------------------------
+
+species(name='C3H6',
+        atoms='C:3 H:6',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 1.49330710E+00,  2.09251750E-02,  4.48679380E-06,
+                      -1.66891210E-08,  7.15814650E-12,  1.07482640E+03,
+                       1.61453400E+01]),
+                NASA([1000.00, 5000.00],
+                     [ 6.73225690E+00,  1.49083360E-02, -4.94989940E-06,
+                       7.21202210E-10, -3.76620430E-14, -9.23570310E+02,
+                      -1.33133480E+01])),
+        transport=gas_transport(geom='nonlinear',
+                                diam=4.14,
+                                well_depth=307.8,
+                                rot_relax=1.0))
+
+species(name='CO',
+        atoms='O:1 C:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 3.26245165E+00,  1.51194085E-03, -3.88175522E-06,
+                       5.58194424E-09, -2.47495123E-12, -1.43105391E+04,
+                       4.84889698E+00]),
+                NASA([1000.00, 5000.00],
+                     [ 3.02507806E+00,  1.44268852E-03, -5.63082779E-07,
+                       1.01858133E-10, -6.91095156E-15, -1.42683496E+04,
+                       6.10821772E+00])),
+        transport=gas_transport(geom='linear',
+                                diam=3.65,
+                                well_depth=98.1,
+                                polar=1.95,
+                                rot_relax=1.8))
+
+species(name='CO2',
+        atoms='O:2 C:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 2.27572465E+00,  9.92207229E-03, -1.04091132E-05,
+                       6.86668678E-09, -2.11728009E-12, -4.83731406E+04,
+                       1.01884880E+01]),
+                NASA([1000.00, 5000.00],
+                     [ 4.45362282E+00,  3.14016873E-03, -1.27841054E-06,
+                       2.39399667E-10, -1.66903319E-14, -4.89669609E+04,
+                      -9.55395877E-01])),
+        transport=gas_transport(geom='linear',
+                                diam=3.763,
+                                well_depth=244.0,
+                                polar=2.65,
+                                rot_relax=2.1))
+
+species(name='H2',
+        atoms='H:2',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 3.35535140E+00,  5.01361440E-04, -2.30069080E-07,
+                      -4.79053240E-10,  4.85225850E-13, -1.01916260E+03,
+                      -3.54772280E+00]),
+                NASA([1000.00, 5000.00],
+                     [ 3.06670950E+00,  5.74737550E-04,  1.39383190E-08,
+                      -2.54835180E-11,  2.90985740E-15, -8.65474120E+02,
+                      -1.77984240E+00])),
+        transport=gas_transport(geom='linear',
+                                diam=2.92,
+                                well_depth=38.0,
+                                polar=0.79,
+                                rot_relax=280.0))
+
+species(name='H2O',
+        atoms='O:1 H:2',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 4.16772340E+00, -1.81149700E-03,  5.94712880E-06,
+                      -4.86920210E-09,  1.52919910E-12, -3.02899690E+04,
+                      -7.31354740E-01]),
+                NASA([1000.00, 5000.00],
+                     [ 2.61104720E+00,  3.15631300E-03, -9.29854380E-07,
+                       1.33315380E-10, -7.46893510E-15, -2.98681670E+04,
+                       7.20912680E+00])),
+        transport=gas_transport(geom='nonlinear',
+                                diam=2.605,
+                                well_depth=572.4,
+                                dipole=1.844,
+                                rot_relax=4.0))
+
+species(name='N2',
+        atoms='N:2',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 3.70441770E+00, -1.42187530E-03,  2.86703920E-06,
+                      -1.20288850E-09, -1.39546770E-14, -1.06407950E+03,
+                       2.23362850E+00]),
+                NASA([1000.00, 5000.00],
+                     [ 2.85328990E+00,  1.60221280E-03, -6.29368930E-07,
+                       1.14410220E-10, -7.80574650E-15, -8.90080930E+02,
+                       6.39648970E+00])),
+        transport=gas_transport(geom='linear',
+                                diam=3.621,
+                                well_depth=97.53,
+                                polar=1.76,
+                                rot_relax=4.0))
+
+species(name='N2O',
+        atoms='O:1 N:2',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 2.61891960E+00,  8.64396160E-03, -6.81106240E-06,
+                       2.22758770E-09, -8.06503300E-14,  8.75901230E+03,
+                       9.22669520E+00]),
+                NASA([1000.00, 5000.00],
+                     [ 4.73066790E+00,  2.82582670E-03, -1.15581150E-06,
+                       2.12636830E-10, -1.45640870E-14,  8.16176820E+03,
+                      -1.71510730E+00])),
+        transport=gas_transport(geom='linear',
+                                diam=3.828,
+                                well_depth=232.4,
+                                rot_relax=1.0))
+
+species(name='NO',
+        atoms='O:1 N:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 4.04595210E+00, -3.41817830E-03,  7.98191900E-06,
+                      -6.11393160E-09,  1.59190760E-12,  9.74539340E+03,
+                       2.99749880E+00]),
+                NASA([1000.00, 5000.00],
+                     [ 3.18900000E+00,  1.33822810E-03, -5.28993180E-07,
+                       9.59193320E-11, -6.48479320E-15,  9.82832900E+03,
+                       6.74581260E+00])),
+        transport=gas_transport(geom='linear',
+                                diam=3.621,
+                                well_depth=97.53,
+                                polar=1.76,
+                                rot_relax=4.0))
+
+species(name='NO2',
+        atoms='O:2 N:1',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 3.45892360E+00,  2.06470640E-03,  6.68660670E-06,
+                      -9.55567250E-09,  3.61958810E-12,  2.81522650E+03,
+                       8.31169830E+00]),
+                NASA([1000.00, 5000.00],
+                     [ 4.62407710E+00,  2.52603320E-03, -1.06094980E-06,
+                       1.98792390E-10, -1.37993840E-14,  2.28999000E+03,
+                       1.33241380E+00])),
+        transport=gas_transport(geom='nonlinear',
+                                diam=3.5,
+                                well_depth=200.0,
+                                rot_relax=1.0))
+
+species(name='O2',
+        atoms='O:2',
+        thermo=(NASA([300.00, 1000.00],
+                     [ 3.78371350E+00, -3.02336340E-03,  9.94927510E-06,
+                      -9.81891010E-09,  3.30318250E-12, -1.06381070E+03,
+                       3.64163450E+00]),
+                NASA([1000.00, 5000.00],
+                     [ 3.61221390E+00,  7.48531660E-04, -1.98206470E-07,
+                       3.37490080E-11, -2.39073740E-15, -1.19781510E+03,
+                       3.67033070E+00])),
+        transport=gas_transport(geom='linear',
+                                diam=3.458,
+                                well_depth=107.4,
+                                polar=1.6,
+                                rot_relax=3.8))
+
+species(name='_Pt_',
+        atoms='Pt:1',
+        thermo=(NASA([300.00, 5000.00],
+                     [ 1.00000000E-99,  0.00000000E+00,  0.00000000E+00,
+                       0.00000000E+00,  0.00000000E+00,  0.00000000E+00,
+                       0.00000000E+00]),
+                NASA([5000.00, 5000.00],
+                     [ 1.00000000E-99,  0.00000000E+00,  0.00000000E+00,
+                       0.00000000E+00,  0.00000000E+00,  0.00000000E+00,
+                       0.00000000E+00])))
+
+species(name='NO_Pt',
+        atoms='O:1 Pt:1 N:1',
+        thermo=(NASA([300.00, 900.00],
+                     [ 3.02717233E+00, -2.35291082E-03,  7.81376243E-06,
+                      -7.14290546E-09,  2.24302265E-12,  1.37772082E+03,
+                      -8.77404102E-01]),
+                NASA([900.00, 900.00],
+                     [ 3.02717233E+00, -2.35291082E-03,  7.81376243E-06,
+                      -7.14290546E-09,  2.24302265E-12,  1.37772082E+03,
+                      -8.77404102E-01])))
+
+species(name='O_Pt',
+        atoms='O:1 Pt:1',
+        thermo=(NASA([300.00, 800.00],
+                     [ 1.52967014E+00, -2.63766497E-04,  1.28966071E-06,
+                      -8.04441298E-10,  0.00000000E+00, -1.40432598E+04,
+                      -3.37596736E+00]),
+                NASA([800.00, 800.00],
+                     [ 1.52967014E+00, -2.63766497E-04,  1.28966071E-06,
+                      -8.04441298E-10,  0.00000000E+00, -1.40432598E+04,
+                      -3.37596736E+00])))
+
+species(name='N_Pt',
+        atoms='Pt:1 N:1',
+        thermo=(NASA([300.00, 900.00],
+                     [ 1.86990513E+00, -3.48858712E-03,  1.04315115E-05,
+                      -1.15987473E-08,  4.77384604E-12,  1.35427962E+04,
+                      -1.18732173E-01]),
+                NASA([900.00, 900.00],
+                     [ 1.86990513E+00, -3.48858712E-03,  1.04315115E-05,
+                      -1.15987473E-08,  4.77384604E-12,  1.35427962E+04,
+                      -1.18732173E-01])))
+
+species(name='H_Pt',
+        atoms='H:1 Pt:1',
+        thermo=(NASA([300.00, 800.00],
+                     [ 9.90750227E-01,  6.94689242E-04, -2.54107153E-09,
+                      -1.41451113E-10,  0.00000000E+00, -4.51438985E+03,
+                      -4.19517661E+00]),
+                NASA([800.00, 800.00],
+                     [ 9.90750227E-01,  6.94689242E-04, -2.54107153E-09,
+                      -1.41451113E-10,  0.00000000E+00, -4.51438985E+03,
+                      -4.19517661E+00])))
+
+species(name='H2O_Pt',
+        atoms='O:1 H:2 Pt:1',
+        thermo=(NASA([300.00, 800.00],
+                     [ 3.33746420E+00,  3.52784936E-04,  2.42556322E-06,
+                      -1.48206404E-09,  0.00000000E+00, -3.62057980E+04,
+                      -9.72027689E+00]),
+                NASA([800.00, 800.00],
+                     [ 3.33746420E+00,  3.52784936E-04,  2.42556322E-06,
+                      -1.48206404E-09,  0.00000000E+00, -3.62057980E+04,
+                      -9.72027689E+00])))
+
+species(name='CO_Pt',
+        atoms='O:1 C:1 Pt:1',
+        thermo=(NASA([300.00, 900.00],
+                     [ 2.71277410E+00,  1.59098477E-03, -3.74426457E-06,
+                       5.29775390E-09, -2.33787849E-12, -3.06782579E+04,
+                      -4.40481342E+00]),
+                NASA([900.00, 900.00],
+                     [ 2.71277410E+00,  1.59098477E-03, -3.74426457E-06,
+                       5.29775390E-09, -2.33787849E-12, -3.06782579E+04,
+                      -4.40481342E+00])))
+
+species(name='CO2_Pt',
+        atoms='O:2 C:1 Pt:1',
+        thermo=(NASA([300.00, 900.00],
+                     [ 4.10777858E+00,  2.27188590E-03, -4.99101157E-06,
+                       7.57467258E-09, -3.73435334E-12, -5.16326794E+04,
+                      -9.57779283E+00]),
+                NASA([900.00, 900.00],
+                     [ 4.10777858E+00,  2.27188590E-03, -4.99101157E-06,
+                       7.57467258E-09, -3.73435334E-12, -5.16326794E+04,
+                      -9.57779283E+00])))
+
+species(name='C3H5_Pt',
+        atoms='C:3 H:5 Pt:1',
+        thermo=(NASA([300.00, 900.00],
+                     [ 1.07734328E+00,  1.86760879E-02,  2.25773296E-06,
+                      -1.24978251E-08,  5.51492067E-12, -4.42512847E+02,
+                       6.78924420E+00]),
+                NASA([900.00, 900.00],
+                     [ 1.07734328E+00,  1.86760879E-02,  2.25773296E-06,
+                      -1.24978251E-08,  5.51492067E-12, -4.42512847E+02,
+                       6.78924420E+00])))
+
+species(name='C3H6_Pt',
+        atoms='C:3 H:6 Pt:2',
+        thermo=(NASA([300.00, 900.00],
+                     [ 1.85583448E+00,  2.09575461E-02, -2.21362246E-06,
+                      -7.09409927E-09,  2.97758999E-12, -8.13308559E+03,
+                       4.17679549E+00]),
+                NASA([900.00, 900.00],
+                     [ 1.85583448E+00,  2.09575461E-02, -2.21362246E-06,
+                      -7.09409927E-09,  2.97758999E-12, -8.13308559E+03,
+                       4.17679549E+00])))
+
+species(name='C_Pt',
+        atoms='C:1 Pt:1',
+        thermo=(NASA([300.00, 900.00],
+                     [ 1.47913248E-01,  1.45202051E-03,  4.47050620E-06,
+                      -7.41988343E-09,  3.64357839E-12,  8.39612563E+03,
+                       4.05922946E+00]),
+                NASA([900.00, 900.00],
+                     [ 1.47913248E-01,  1.45202051E-03,  4.47050620E-06,
+                      -7.41988343E-09,  3.64357839E-12,  8.39612563E+03,
+                       4.05922946E+00])))
+
+species(name='CH_Pt',
+        atoms='C:1 H:1 Pt:1',
+        thermo=(NASA([300.00, 900.00],
+                     [ 3.76853374E-01,  4.33007371E-03,  1.26813836E-06,
+                      -4.03298591E-09,  1.91710002E-12,  1.95692528E+04,
+                       2.10382533E+00]),
+                NASA([900.00, 900.00],
+                     [ 3.76853374E-01,  4.33007371E-03,  1.26813836E-06,
+                      -4.03298591E-09,  1.91710002E-12,  1.95692528E+04,
+                       2.10382533E+00])))
+
+species(name='CH2_Pt',
+        atoms='C:1 H:2 Pt:1',
+        thermo=(NASA([300.00, 900.00],
+                     [ 8.33824124E-02,  7.46370122E-03,  1.10415461E-06,
+                      -5.20153053E-09,  2.18780284E-12,  8.36101765E+03,
+                       2.55159890E+00]),
+                NASA([900.00, 900.00],
+                     [ 8.33824124E-02,  7.46370122E-03,  1.10415461E-06,
+                      -5.20153053E-09,  2.18780284E-12,  8.36101765E+03,
+                       2.55159890E+00])))
+
+species(name='CH3_Pt',
+        atoms='C:1 H:3 Pt:1',
+        thermo=(NASA([300.00, 900.00],
+                     [ 8.57809745E-01,  9.76143682E-03, -3.41063308E-06,
+                       2.57308727E-10, -3.74694697E-13, -4.64570142E+03,
+                       1.16541017E-01]),
+                NASA([900.00, 900.00],
+                     [ 8.57809745E-01,  9.76143682E-03, -3.41063308E-06,
+                       2.57308727E-10, -3.74694697E-13, -4.64570142E+03,
+                       1.16541017E-01])))
+
+species(name='C2H3_Pt',
+        atoms='C:2 H:3 Pt:1',
+        thermo=(NASA([300.00, 900.00],
+                     [ 1.00267303E+00,  1.12120748E-02,  1.08826725E-06,
+                      -7.20229473E-09,  3.28613356E-12,  3.80551264E+03,
+                       4.19828627E+00]),
+                NASA([900.00, 900.00],
+                     [ 1.00267303E+00,  1.12120748E-02,  1.08826725E-06,
+                      -7.20229473E-09,  3.28613356E-12,  3.80551264E+03,
+                       4.19828627E+00])))
+
+species(name='OH_Pt',
+        atoms='O:1 H:1 Pt:1',
+        thermo=(NASA([300.00, 800.00],
+                     [ 2.33488520E+00,  3.22820417E-04,  1.77158426E-06,
+                      -1.19563622E-09,  0.00000000E+00, -2.57097938E+04,
+                      -7.40908407E+00]),
+                NASA([800.00, 800.00],
+                     [ 2.33488520E+00,  3.22820417E-04,  1.77158426E-06,
+                      -1.19563622E-09,  0.00000000E+00, -2.57097938E+04,
+                      -7.40908407E+00])))
+
+species(name='CH3CO_Pt',
+        atoms='O:1 C:2 H:3 Pt:1',
+        thermo=(NASA([300.00, 900.00],
+                     [ 2.99398937E+00,  1.15976265E-02, -3.66470550E-06,
+                       3.58826366E-10, -4.36573914E-13, -2.59207895E+04,
+                      -4.95181670E+00]),
+                NASA([900.00, 900.00],
+                     [ 2.99398937E+00,  1.15976265E-02, -3.66470550E-06,
+                       3.58826366E-10, -4.36573914E-13, -2.59207895E+04,
+                      -4.95181670E+00])))
+
+species(name='C3H5_Pt1',
+        atoms='C:3 H:5 Pt:1',
+        thermo=(NASA([300.00, 900.00],
+                     [ 4.83555099E-01,  1.80358010E-02,  1.05860725E-05,
+                      -2.44828289E-08,  1.09002865E-11,  8.98332516E+03,
+                       7.16225851E+00]),
+                NASA([900.00, 900.00],
+                     [ 4.83555099E-01,  1.80358010E-02,  1.05860725E-05,
+                      -2.44828289E-08,  1.09002865E-11,  8.98332516E+03,
+                       7.16225851E+00])))
+
+species(name='C3H4_Pt1',
+        atoms='C:3 H:4 Pt:1',
+        thermo=(NASA([300.00, 5000.00],
+                     [ 1.00000000E-99,  0.00000000E+00,  0.00000000E+00,
+                       0.00000000E+00,  0.00000000E+00,  0.00000000E+00,
+                       0.00000000E+00]),
+                NASA([5000.00, 5000.00],
+                     [ 1.00000000E-99,  0.00000000E+00,  0.00000000E+00,
+                       0.00000000E+00,  0.00000000E+00,  0.00000000E+00,
+                       0.00000000E+00])))
+
+species(name='NO2_Pt',
+        atoms='O:2 Pt:1 N:1',
+        thermo=(NASA([300.00, 900.00],
+                     [ 3.95654168E+00, -8.30664675E-04,  6.68591838E-06,
+                      -6.06096773E-09,  1.53311776E-12, -1.07963532E+03,
+                       5.56565050E-01]),
+                NASA([900.00, 900.00],
+                     [ 3.95654168E+00, -8.30664675E-04,  6.68591838E-06,
+                      -6.06096773E-09,  1.53311776E-12, -1.07963532E+03,
+                       5.56565050E-01])))
+
+species(name='N2O_Pt',
+        atoms='O:1 Pt:1 N:2',
+        thermo=(NASA([300.00, 900.00],
+                     [ 3.50833254E+00,  1.39878835E-03,  5.72361548E-06,
+                      -8.26453214E-09,  3.47126761E-12,  1.00055866E+04,
+                      -2.79050713E+00]),
+                NASA([900.00, 900.00],
+                     [ 3.50833254E+00,  1.39878835E-03,  5.72361548E-06,
+                      -8.26453214E-09,  3.47126761E-12,  1.00055866E+04,
+                      -2.79050713E+00])))
+
+species(name='HCOO_Pt',
+        atoms='O:2 C:1 H:1 Pt:1',
+        thermo=(NASA([300.00, 900.00],
+                     [ 2.84183375E+00,  4.40992330E-03, -5.96551946E-06,
+                       7.32082418E-09, -3.47262183E-12, -1.52640070E+04,
+                      -5.39553627E+00]),
+                NASA([900.00, 900.00],
+                     [ 2.84183375E+00,  4.40992330E-03, -5.96551946E-06,
+                       7.32082418E-09, -3.47262183E-12, -1.52640070E+04,
+                      -5.39553627E+00])))
+
+#-------------------------------------------------------------------------------
+# Reaction data
+#-------------------------------------------------------------------------------
+disable_motz_wise()
+
+# PT_SURFACE Reaction 1
+surface_reaction('C3H6 + _Pt_ + _Pt_ => C3H6_Pt', stick(9.800000e-01, 0.0, (0.0, 'J/mol')),
+                 id='PT_SURFACE-1')
+
+# PT_SURFACE Reaction 2
+surface_reaction('C3H6_Pt => _Pt_ + _Pt_ + C3H6', [3.688000e+12, 0.0, (74370.0, 'J/mol')],
+                 id='PT_SURFACE-2')
+
+# PT_SURFACE Reaction 3
+surface_reaction('C3H6 + _Pt_ + O_Pt => C3H5_Pt1 + OH_Pt', stick(5.000000e-02, 0.0, (0.0, 'J/mol')),
+                 id='PT_SURFACE-3')
+
+# PT_SURFACE Reaction 4
+surface_reaction('C3H5_Pt1 + OH_Pt => O_Pt + _Pt_ + C3H6', [3.700000e+21, 0.0, (31000.0, 'J/mol')],
+                 id='PT_SURFACE-4')
+
+# PT_SURFACE Reaction 5
+surface_reaction('O2 + _Pt_ + _Pt_ => O_Pt + O_Pt', stick(7.000000e-02, 0.0, (0.0, 'J/mol')),
+                 id='PT_SURFACE-5')
+
+# PT_SURFACE Reaction 6
+surface_reaction('O_Pt + O_Pt => _Pt_ + _Pt_ + O2',
+                 Arrhenius(3.218000e+21, 0.0, (224710.0, 'J/mol'),
+                           coverage=[['O_Pt', 0.0, 0.0, (-120000.0, 'J/mol')]]),
+                 id='PT_SURFACE-6')
+
+# PT_SURFACE Reaction 7
+surface_reaction('H2 + _Pt_ + _Pt_ => H_Pt + H_Pt', stick(4.600000e-02, 0.0, (0.0, 'J/mol')),
+                 id='PT_SURFACE-7')
+
+# PT_SURFACE Reaction 8
+surface_reaction('H_Pt + H_Pt => _Pt_ + _Pt_ + H2',
+                 Arrhenius(2.121000e+21, 0.0, (69110.0, 'J/mol'),
+                           coverage=[['H_Pt', 0.0, 0.0, (-6000.0, 'J/mol')]]),
+                 id='PT_SURFACE-8')
+
+# PT_SURFACE Reaction 9
+surface_reaction('H2O + _Pt_ => H2O_Pt', stick(7.500000e-01, 0.0, (0.0, 'J/mol')),
+                 id='PT_SURFACE-9')
+
+# PT_SURFACE Reaction 10
+surface_reaction('H2O_Pt => _Pt_ + H2O', [5.013000e+13, 0.0, (49160.0, 'J/mol')],
+                 id='PT_SURFACE-10')
+
+# PT_SURFACE Reaction 11
+surface_reaction('CO2 + _Pt_ => CO2_Pt', stick(5.000000e-03, 0.0, (0.0, 'J/mol')),
+                 id='PT_SURFACE-11')
+
+# PT_SURFACE Reaction 12
+surface_reaction('CO2_Pt => _Pt_ + CO2', [3.565000e+10, 0.0, (23660.0, 'J/mol')],
+                 id='PT_SURFACE-12')
+
+# PT_SURFACE Reaction 13
+surface_reaction('CO + _Pt_ => CO_Pt', stick(8.400000e-01, 0.0, (0.0, 'J/mol')),
+                 id='PT_SURFACE-13')
+
+# PT_SURFACE Reaction 14
+surface_reaction('CO_Pt => _Pt_ + CO',
+                 Arrhenius(2.126000e+13, 0.0, (136190.0, 'J/mol'),
+                           coverage=[['CO_Pt', 0.0, 0.0, (-33000.0, 'J/mol')]]),
+                 id='PT_SURFACE-14')
+
+# PT_SURFACE Reaction 15
+surface_reaction('NO + _Pt_ => NO_Pt', stick(8.500000e-01, 0.0, (0.0, 'J/mol')),
+                 id='PT_SURFACE-15')
+
+# PT_SURFACE Reaction 16
+surface_reaction('NO_Pt => _Pt_ + NO', [2.047000e+12, 0.0, (80740.0, 'J/mol')],
+                 id='PT_SURFACE-16')
+
+# PT_SURFACE Reaction 17
+surface_reaction('NO2 + _Pt_ => NO2_Pt', stick(9.000000e-01, 0.0, (0.0, 'J/mol')),
+                 id='PT_SURFACE-17')
+
+# PT_SURFACE Reaction 18
+surface_reaction('NO2_Pt => _Pt_ + NO2', [1.438000e+13, 0.0, (60990.0, 'J/mol')],
+                 id='PT_SURFACE-18')
+
+# PT_SURFACE Reaction 19
+surface_reaction('N2O + _Pt_ => N2O_Pt', stick(2.500000e-02, 0.0, (0.0, 'J/mol')),
+                 id='PT_SURFACE-19')
+
+# PT_SURFACE Reaction 20
+surface_reaction('N2O_Pt => _Pt_ + N2O', [1.287000e+10, 0.0, (730.0, 'J/mol')],
+                 id='PT_SURFACE-20')
+
+# PT_SURFACE Reaction 21
+surface_reaction('N_Pt + N_Pt => _Pt_ + _Pt_ + N2',
+                 Arrhenius(3.700000e+21, 0.0, (113900.0, 'J/mol'),
+                           coverage=[['CO_Pt', 0.0, 0.0, (-75000.0, 'J/mol')]]),
+                 id='PT_SURFACE-21')
+
+# PT_SURFACE Reaction 22
+surface_reaction('C3H6_Pt => C3H5_Pt + H_Pt', [1.000000e+13, 0.0, (75400.0, 'J/mol')],
+                 id='PT_SURFACE-22')
+
+# PT_SURFACE Reaction 23
+surface_reaction('C3H5_Pt + H_Pt => C3H6_Pt', [3.665000e+21, 0.0, (48800.0, 'J/mol')],
+                 id='PT_SURFACE-23')
+
+# PT_SURFACE Reaction 24
+surface_reaction('C3H5_Pt + _Pt_ => C2H3_Pt + CH2_Pt', [3.700000e+21, 0.0, (108200.0, 'J/mol')],
+                 id='PT_SURFACE-24')
+
+# PT_SURFACE Reaction 25
+surface_reaction('C2H3_Pt + CH2_Pt => C3H5_Pt + _Pt_', [3.665000e+21, 0.0, (3340.0, 'J/mol')],
+                 id='PT_SURFACE-25')
+
+# PT_SURFACE Reaction 26
+surface_reaction('C2H3_Pt + _Pt_ => CH3_Pt + C_Pt', [3.700000e+21, 0.0, (46000.0, 'J/mol')],
+                 id='PT_SURFACE-26')
+
+# PT_SURFACE Reaction 27
+surface_reaction('CH3_Pt + C_Pt => C2H3_Pt + _Pt_', [3.719000e+21, 0.0, (46450.0, 'J/mol')],
+                 id='PT_SURFACE-27')
+
+# PT_SURFACE Reaction 28
+surface_reaction('CH3_Pt + _Pt_ => CH2_Pt + H_Pt', [1.262000e+22, 0.0, (70400.0, 'J/mol')],
+                 id='PT_SURFACE-28')
+
+# PT_SURFACE Reaction 29
+surface_reaction('CH2_Pt + H_Pt => CH3_Pt + _Pt_', [2.943000e+22, 0.0, (410.0, 'J/mol')],
+                 id='PT_SURFACE-29')
+
+# PT_SURFACE Reaction 30
+surface_reaction('CH2_Pt + _Pt_ => CH_Pt + H_Pt', [7.000000e+22, 0.0, (59200.0, 'J/mol')],
+                 id='PT_SURFACE-30')
+
+# PT_SURFACE Reaction 31
+surface_reaction('CH_Pt + H_Pt => CH2_Pt + _Pt_', [8.110000e+21, 0.0, (710.0, 'J/mol')],
+                 id='PT_SURFACE-31')
+
+# PT_SURFACE Reaction 32
+surface_reaction('CH_Pt + _Pt_ => C_Pt + H_Pt', [3.090000e+22, 0.0, (0.0, 'J/mol')],
+                 id='PT_SURFACE-32')
+
+# PT_SURFACE Reaction 33
+surface_reaction('C_Pt + H_Pt => CH_Pt + _Pt_', [5.792000e+21, 0.0, (128870.0, 'J/mol')],
+                 id='PT_SURFACE-33')
+
+# PT_SURFACE Reaction 34
+surface_reaction('C3H5_Pt1 + O_Pt => C3H4_Pt1 + OH_Pt', [5.000000e+21, 0.0, (70000.0, 'J/mol')],
+                 id='PT_SURFACE-34')
+
+# PT_SURFACE Reaction 35
+surface_reaction('C2H3_Pt + O_Pt => CH3CO_Pt + _Pt_', [3.700000e+19, 0.0, (62300.0, 'J/mol')],
+                 id='PT_SURFACE-35')
+
+# PT_SURFACE Reaction 36
+surface_reaction('CH3CO_Pt + _Pt_ => C2H3_Pt + O_Pt',
+                 Arrhenius(7.894000e+20, 0.0, (191390.0, 'J/mol'),
+                           coverage=[['O_Pt', 0.0, 0.0, (60000.0, 'J/mol')]]),
+                 id='PT_SURFACE-36')
+
+# PT_SURFACE Reaction 37
+surface_reaction('CH3_Pt + CO_Pt => CH3CO_Pt + _Pt_', [3.700000e+21, 0.0, (82900.0, 'J/mol')],
+                 id='PT_SURFACE-37')
+
+# PT_SURFACE Reaction 38
+surface_reaction('CH3CO_Pt + _Pt_ => CH3_Pt + CO_Pt',
+                 Arrhenius(1.746000e+23, 0.0, (6120.0, 'J/mol'),
+                           coverage=[['CO_Pt', 0.0, 0.0, (33000.0, 'J/mol')]]),
+                 id='PT_SURFACE-38')
+
+# PT_SURFACE Reaction 39
+surface_reaction('CH3_Pt + O_Pt => OH_Pt + CH2_Pt', [3.700000e+21, 0.0, (36600.0, 'J/mol')],
+                 id='PT_SURFACE-39')
+
+# PT_SURFACE Reaction 40
+surface_reaction('OH_Pt + CH2_Pt => CH3_Pt + O_Pt', [2.342000e+22, 0.0, (25980.0, 'J/mol')],
+                 id='PT_SURFACE-40')
+
+# PT_SURFACE Reaction 41
+surface_reaction('CH2_Pt + O_Pt => OH_Pt + CH_Pt', [3.700000e+21, 0.0, (25100.0, 'J/mol')],
+                 id='PT_SURFACE-41')
+
+# PT_SURFACE Reaction 42
+surface_reaction('OH_Pt + CH_Pt => CH2_Pt + O_Pt', [1.163000e+21, 0.0, (26800.0, 'J/mol')],
+                 id='PT_SURFACE-42')
+
+# PT_SURFACE Reaction 43
+surface_reaction('CH_Pt + O_Pt => OH_Pt + C_Pt', [3.700000e+21, 0.0, (25100.0, 'J/mol')],
+                 id='PT_SURFACE-43')
+
+# PT_SURFACE Reaction 44
+surface_reaction('OH_Pt + C_Pt => CH_Pt + O_Pt', [1.882000e+21, 0.0, (214160.0, 'J/mol')],
+                 id='PT_SURFACE-44')
+
+# PT_SURFACE Reaction 45
+surface_reaction('H_Pt + O_Pt => OH_Pt + _Pt_', [3.700000e+20, 0.0, (70500.0, 'J/mol')],
+                 id='PT_SURFACE-45')
+
+# PT_SURFACE Reaction 46
+surface_reaction('OH_Pt + _Pt_ => H_Pt + O_Pt', [1.004000e+21, 0.0, (130690.0, 'J/mol')],
+                 id='PT_SURFACE-46')
+
+# PT_SURFACE Reaction 47
+surface_reaction('OH_Pt + H_Pt => H2O_Pt + _Pt_', [3.700000e+21, 0.0, (17400.0, 'J/mol')],
+                 id='PT_SURFACE-47')
+
+# PT_SURFACE Reaction 48
+surface_reaction('H2O_Pt + _Pt_ => OH_Pt + H_Pt', [6.824000e+20, 0.0, (67560.0, 'J/mol')],
+                 id='PT_SURFACE-48')
+
+# PT_SURFACE Reaction 49
+surface_reaction('OH_Pt + OH_Pt => H2O_Pt + O_Pt', [3.700000e+21, 0.0, (48200.0, 'J/mol')],
+                 id='PT_SURFACE-49')
+
+# PT_SURFACE Reaction 50
+surface_reaction('H2O_Pt + O_Pt => OH_Pt + OH_Pt', [2.515000e+20, 0.0, (38170.0, 'J/mol')],
+                 id='PT_SURFACE-50')
+
+# PT_SURFACE Reaction 51
+surface_reaction('CO_Pt + O_Pt => CO2_Pt + _Pt_',
+                 Arrhenius(3.700000e+20, 0.0, (108000.0, 'J/mol'),
+                           coverage=[['CO_Pt', 0.0, 0.0, (-33000.0, 'J/mol')],
+                                     ['NO_Pt', 0.0, 0.0, (90000.0, 'J/mol')]]),
+                 id='PT_SURFACE-51')
+
+# PT_SURFACE Reaction 52
+surface_reaction('CO2_Pt + _Pt_ => CO_Pt + O_Pt',
+                 Arrhenius(3.964000e+21, 0.0, (165590.0, 'J/mol'),
+                           coverage=[['O_Pt', 0.0, 0.0, (60000.0, 'J/mol')]]),
+                 id='PT_SURFACE-52')
+
+# PT_SURFACE Reaction 53
+surface_reaction('C_Pt + O_Pt => CO_Pt + _Pt_',
+                 Arrhenius(3.700000e+21, 0.0, (0.0, 'J/mol'),
+                           coverage=[['CO_Pt', 0.0, 0.0, (33000.0, 'J/mol')]]),
+                 id='PT_SURFACE-53')
+
+# PT_SURFACE Reaction 54
+surface_reaction('CO_Pt + _Pt_ => C_Pt + O_Pt',
+                 Arrhenius(1.664000e+21, 0.0, (205420.0, 'J/mol'),
+                           coverage=[['O_Pt', 0.0, 0.0, (60000.0, 'J/mol')]]),
+                 id='PT_SURFACE-54')
+
+# PT_SURFACE Reaction 55
+surface_reaction('OH_Pt + CO_Pt => HCOO_Pt + _Pt_', [3.700000e+21, 0.0, (94200.0, 'J/mol')],
+                 id='PT_SURFACE-55')
+
+# PT_SURFACE Reaction 56
+surface_reaction('HCOO_Pt + _Pt_ => OH_Pt + CO_Pt', [1.333000e+21, 0.0, (870.0, 'J/mol')],
+                 id='PT_SURFACE-56')
+
+# PT_SURFACE Reaction 57
+surface_reaction('HCOO_Pt + O_Pt => OH_Pt + CO2_Pt', [3.700000e+21, 0.0, (0.0, 'J/mol')],
+                 id='PT_SURFACE-57')
+
+# PT_SURFACE Reaction 58
+surface_reaction('OH_Pt + CO2_Pt => HCOO_Pt + O_Pt', [2.787000e+21, 0.0, (151050.0, 'J/mol')],
+                 id='PT_SURFACE-58')
+
+# PT_SURFACE Reaction 59
+surface_reaction('HCOO_Pt + _Pt_ => CO2_Pt + H_Pt', [3.700000e+21, 0.0, (0.0, 'J/mol')],
+                 id='PT_SURFACE-59')
+
+# PT_SURFACE Reaction 60
+surface_reaction('CO2_Pt + H_Pt => HCOO_Pt + _Pt_', [2.787000e+21, 0.0, (90050.0, 'J/mol')],
+                 id='PT_SURFACE-60')
+
+# PT_SURFACE Reaction 61
+surface_reaction('NO_Pt + _Pt_ => N_Pt + O_Pt',
+                 Arrhenius(5.000000e+20, 0.0, (107800.0, 'J/mol'),
+                           coverage=[['CO_Pt', 0.0, 0.0, (33000.0, 'J/mol')]]),
+                 id='PT_SURFACE-61')
+
+# PT_SURFACE Reaction 62
+surface_reaction('N_Pt + O_Pt => NO_Pt + _Pt_',
+                 Arrhenius(9.970000e+20, 0.0, (122550.0, 'J/mol'),
+                           coverage=[['O_Pt', 0.0, 0.0, (-60000.0, 'J/mol')]]),
+                 id='PT_SURFACE-62')
+
+# PT_SURFACE Reaction 63
+surface_reaction('O_Pt + NO => NO2_Pt',
+                 Arrhenius(1.963000e+13, 0.0, (111280.0, 'J/mol'),
+                           coverage=[['O_Pt', 0.0, 0.0, (-60000.0, 'J/mol')],
+                                     ['CO_Pt', 0.0, 0.0, (75000.0, 'J/mol')]]),
+                 id='PT_SURFACE-63')
+
+# PT_SURFACE Reaction 64
+surface_reaction('NO2_Pt => O_Pt + NO', [3.306000e+14, 0.0, (115460.0, 'J/mol')],
+                 id='PT_SURFACE-64')
+
+# PT_SURFACE Reaction 65
+surface_reaction('N_Pt + NO_Pt => N2O_Pt + _Pt_', [1.000000e+21, 0.0, (90900.0, 'J/mol')],
+                 id='PT_SURFACE-65')
+
+# PT_SURFACE Reaction 66
+surface_reaction('N2O_Pt + _Pt_ => N_Pt + NO_Pt', [2.876000e+24, 0.0, (133130.0, 'J/mol')],
+                 id='PT_SURFACE-66')
+
+# PT_SURFACE Reaction 67
+surface_reaction('O_Pt + NO_Pt => NO2_Pt + _Pt_',
+                 Arrhenius(1.317000e+17, 0.0, (133000.0, 'J/mol'),
+                           coverage=[['CO_Pt', 0.0, 0.0, (75000.0, 'J/mol')]]),
+                 id='PT_SURFACE-67')
+
+# PT_SURFACE Reaction 68
+surface_reaction('NO2_Pt + _Pt_ => O_Pt + NO_Pt', [8.128000e+18, 0.0, (58000.0, 'J/mol')],
+                 id='PT_SURFACE-68')
+
+# PT_SURFACE Reaction 69
+surface_reaction('H_Pt + NO_Pt => OH_Pt + N_Pt',
+                 Arrhenius(1.180000e+21, 0.0, (25000.0, 'J/mol'),
+                           coverage=[['CO_Pt', 0.0, 0.0, (75000.0, 'J/mol')]]),
+                 id='PT_SURFACE-69')
+
+# PT_SURFACE Reaction 70
+surface_reaction('OH_Pt + N_Pt => H_Pt + NO_Pt', [6.386000e+21, 0.0, (99930.0, 'J/mol')],
+                 id='PT_SURFACE-70')
+
+# PT_SURFACE Reaction 71
+surface_reaction('NO2_Pt + H_Pt => OH_Pt + NO_Pt', [3.930000e+21, 0.0, (20000.0, 'J/mol')],
+                 id='PT_SURFACE-71')
+
+# PT_SURFACE Reaction 72
+surface_reaction('OH_Pt + NO_Pt => NO2_Pt + H_Pt', [6.075000e+22, 0.0, (175290.0, 'J/mol')],
+                 id='PT_SURFACE-72')
