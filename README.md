@@ -110,9 +110,7 @@ This example solves a plug flow reactor problem, where the chemistry is surface 
 
     import cantera as ct
     import numpy as np
-    import plug as pfr
-    import time
-    start = time.time()  
+    import plug as pfr 
 
     #### Input mechanism data ####:      
     input_file = 'methane_pox_on_pt.cti' 
