@@ -1,7 +1,7 @@
 import numpy as np
 
 class ReduceMechanism(object):
-    def __init__(self,index,gas,surf,bulk=None):
+    def __init__(self,gas,surf,bulk=None):
         #Initialize Cantera solution objects containing the full mechanism
         self.gas = gas             #Gas phase
         self.surf = surf           #Surface phase
@@ -36,10 +36,7 @@ class ReduceMechanism(object):
         else:
             #Set the flag off
             self.flag_bulk = 0
-            
-        #Reduced reaction set index
-        self.idx_redux = index
-        
+                   
         #List of full mechanism reaction objects. Assume mechanism 
         #has only surface reactions
         self.reactions = self.surf.reactions()
@@ -58,7 +55,91 @@ class ReduceMechanism(object):
         #Physical constants (SI units)
         self.boltzmann = 1.3806487924497037e-23
         self.lightspeed = 299792458.0
+    
+    def solve_reduction_problem(self,sim,trange,state0):
         
+        #Make reference to solver object
+        self._sim = sim
+               
+        #Make reference to reactor object
+        self._r = sim.solver._r
+   
+        #Make reference to surface object
+        self._surf_obj = sim.solver._r.rs.surface
+        
+        #Unpack initial state tuple
+        self.P_in, self.X_in, self.u_in = state0
+        
+        #Create error list
+        self.err = []
+       
+        #Loop over temperature range
+        for i,temp in enumerate(trange):  
+            
+            #Reset surface reaction multiplier to 1
+            self._surf_obj.set_multiplier(1.0)
+            
+            #Current reactor inlet state
+            self._r.TPX = temp, self.P_in, self.X_in
+            
+            #Set inlet flow velocity [m/s]
+            self._r.u = self.u_in[i]
+             
+            #Solve the PFR
+            self._sim.solve()
+       
+            #Compute reference net reaction rates
+            r_ref = np.abs(self._surf_obj.net_rates_of_progress)
+        
+            #List for perturbed reaction rates
+            r_j = []
+            
+            #Deactivate each reaction sequentially
+            for j in range(self._surf_obj.n_reactions):
+                
+                #Turn off one reaction at a time
+                self._surf_obj.set_multiplier(0.0,j)
+            
+                #Recompute coverages
+                self._surf_obj.advance_coverages(self._sim.solver.tcovs)
+                
+                #Recompute net reaction rates
+                r_j.append(np.abs(self._surf_obj.net_rates_of_progress))
+        
+            #Convert list to array
+            r_j = np.array(r_j)
+            
+            #Deviation from reference reaction rate values
+            sq_diff = np.sum((r_ref - r_j)**2,axis=1)
+            
+            #Variance of perturbed values
+            var = np.var(r_j,axis=1,ddof=1)
+            
+            #Compute error
+            self.err.append(sq_diff/var)
+            
+        #Convert lists to arrays
+        self.err = np.array(self.err).T
+
+    def get_reduced_index(self,err_cutoff):
+        
+        #Find reactions that produce a small error    
+        self.ridx = self.err >= err_cutoff
+        
+        #Union of all indices
+        self.ridx = np.any(self.ridx,axis=1)
+        
+        #Index of reduced reactions
+        idx_redux = np.nonzero(self.ridx)[0]
+        
+        #Number of reduced reactions
+        self.nrxn = len(idx_redux)
+        
+        #Print number of reactions
+        print('Number of reactions: {0:0d}'.format(self.nrxn))
+
+        return idx_redux
+
     def get_inert_gas_species(self):
         
         #Create dict to store species
@@ -77,7 +158,10 @@ class ReduceMechanism(object):
         #Find inert gas species name
         self.inert_gas = list(set(self.gas_names) - set(species))
         
-    def get_redux_mech(self):
+    def get_redux_mech(self,index):
+        
+        #Reduced reaction set index
+        self.idx_redux = index
         
         #Create lists to store data
         self.r = []
@@ -145,10 +229,10 @@ class ReduceMechanism(object):
             #Bulk phase species names
             self.s_bulk_names = [s.name for s in self.s_bulk]
 
-    def write_to_cti(self,filename=None):
+    def write_to_cti(self,index,filename=None):
         
         #Get reduced mechanism data
-        self.get_redux_mech()
+        self.get_redux_mech(index)
         
         #Write CTI source file
         lines = []

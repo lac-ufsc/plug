@@ -501,34 +501,64 @@ class ReactorSolver(object):
         #Collect solution variables into class
         self.collect_results()
                               
-    def solve_trange(self,trange,state,mdot_in=None,u_in=None):
+    def solve_trange(self,trange,state,mdot_in=[],u_in=[]):
         
         #Temperature range (convert to list)
         self.trange = trange
         if not isinstance(self.trange,list):
             self.trange = list(self.trange)
-        
+
         #Other state variables (pressure,composition)
         self.state_p = state[0]
         self.state_comp = state[1]
         
+        #Initialize flags
+        self.flag_mdot_in = 0
+        self.flag_u_in = 0
+
         #Test whether a mass flow rate or a velocity was specified
-        if mdot_in != None:
+        if mdot_in != []:
+            
+            #Save variable within class
             self.mdot_in = mdot_in
             
-            #Turn on mass flow rate flag
-            self.flag_mdot_in = 1
+            #Check if input is a number
+            if isinstance(self.mdot_in,(int,float)):
+                #Convert number to list
+                self.mdot_in = list([self.mdot_in])
+                
+                #Turn flag single for single input value
+                self.flag_mdot_in = 1
+            else:
+                #Convert array to list
+                self.mdot_in = list(self.mdot_in)
+                
+                #Turn flag single for multiple input values
+                self.flag_mdot_in = 2
 
-        if u_in != None:                       
+        if u_in != []:       
+            #Save variable within class
             self.u_in = u_in
             
-            #Turn on mass flow rate flag
-            self.flag_u_in = 1
+            #Check if input is a number
+            if isinstance(self.u_in,(int,float)):
+                #Convert number to list
+                self.u_in = list([self.u_in])
+                
+                #Turn flag single for single input value
+                self.flag_u_in = 1
+            else:
+                #Convert array to list
+                self.u_in = list(self.u_in)
+                
+                #Turn flag single for multiple input values
+                self.flag_u_in = 2
+
 
         #Store results within list
         self.output_all = []
 
-        for self.state_t in self.trange:
+        for i,self.state_t in enumerate(self.trange):
             
             #Current reactor thermodynamic state
             self.cstate = (self.state_t,self.state_p,self.state_comp)
@@ -539,11 +569,21 @@ class ReactorSolver(object):
             #Set reactor inlet flow conditions:
             if self.flag_mdot_in == 1:
                 #Set inlet mass flow rate [kg/s]
-                self.solver._r.mdot = self.mdot_in
-    
-            elif self.flag_u_in == 1:
+                self.solver._r.mdot = self.mdot_in[0]
+                
+            #If more than multiple values were supplied
+            elif self.flag_mdot_in == 2:
+                #Set inlet mass flow rate [kg/s]
+                self.solver._r.mdot = self.mdot_in[i]
+                
+            if self.flag_u_in == 1:
                 #Set inlet flow velocity [m/s]
-                self.solver._r.u = self.u_in
+                self.solver._r.u = self.u_in[0]
+
+            #If more than multiple values were supplied
+            elif self.flag_u_in == 2:
+                #Set inlet mass flow rate [kg/s]
+                self.solver._r.u = self.u_in[i]
                 
             #Solve the PFR problem at current temperature
             self.solve() 
