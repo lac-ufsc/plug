@@ -56,19 +56,20 @@ class ReduceMechanism(object):
         self.boltzmann = 1.3806487924497037e-23
         self.lightspeed = 299792458.0
     
-    def solve_reduction_problem(self,sim,trange,state0):
+    def solve_reduction_problem(self,trange,state,tcovs=1e02):
+
+        #Unpack initial state tuple (pressure,molar fraction array, coverages
+        #array). Composition arrays must have same length as the temperature
+        #range
+        self.P0, self.X0 = state
         
-        #Make reference to solver object
-        self._sim = sim
-               
-        #Make reference to reactor object
-        self._r = sim.solver._r
-   
-        #Make reference to surface object
-        self._surf_obj = sim.solver._r.rs.surface
-        
-        #Unpack initial state tuple
-        self.P_in, self.X_in, self.u_in = state0
+        #Check molar composition input
+        if isinstance(self.X0,dict):
+            #Set gas phase object molar composition
+            self.gas.X = self.X0
+            #If composition is given in form of a dictionary
+            self.X0 = np.reshape(np.tile(self.gas.X,len(trange)),
+                                 (len(trange),len(self.gas.X)))
         
         #Create error list
         self.err = []
@@ -76,35 +77,35 @@ class ReduceMechanism(object):
         #Loop over temperature range
         for i,temp in enumerate(trange):  
             
+            #Set gas phase thermodynamic state
+            self.gas.TPX = temp, self.P0, self.X0[i,:]
+
             #Reset surface reaction multiplier to 1
-            self._surf_obj.set_multiplier(1.0)
+            self.surf.set_multiplier(1.0)
             
-            #Current reactor inlet state
-            self._r.TPX = temp, self.P_in, self.X_in
+            #Set surface phase thermodynamic state
+            self.surf.TP = temp, self.P0
             
-            #Set inlet flow velocity [m/s]
-            self._r.u = self.u_in[i]
-             
-            #Solve the PFR
-            self._sim.solve()
-       
+            #Compute coverages for current state
+            self.surf.advance_coverages(tcovs)
+
             #Compute reference net reaction rates
-            r_ref = np.abs(self._surf_obj.net_rates_of_progress)
+            r_ref = np.abs(self.surf.net_rates_of_progress)
         
             #List for perturbed reaction rates
             r_j = []
             
             #Deactivate each reaction sequentially
-            for j in range(self._surf_obj.n_reactions):
+            for j in range(self.surf.n_reactions):
                 
                 #Turn off one reaction at a time
-                self._surf_obj.set_multiplier(0.0,j)
+                self.surf.set_multiplier(0.0,j)
             
                 #Recompute coverages
-                self._surf_obj.advance_coverages(self._sim.solver.tcovs)
+                self.surf.advance_coverages(tcovs)
                 
                 #Recompute net reaction rates
-                r_j.append(np.abs(self._surf_obj.net_rates_of_progress))
+                r_j.append(np.abs(self.surf.net_rates_of_progress))
         
             #Convert list to array
             r_j = np.array(r_j)
@@ -120,11 +121,13 @@ class ReduceMechanism(object):
             
         #Convert lists to arrays
         self.err = np.array(self.err).T
+        
+        return self.err
 
-    def get_reduced_index(self,err_cutoff):
+    def get_reduced_index(self,err,err_cutoff):
         
         #Find reactions that produce a small error    
-        self.ridx = self.err >= err_cutoff
+        self.ridx = err >= err_cutoff
         
         #Union of all indices
         self.ridx = np.any(self.ridx,axis=1)
