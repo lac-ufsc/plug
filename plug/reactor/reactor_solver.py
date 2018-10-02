@@ -501,8 +501,13 @@ class ReactorSolver(object):
         #Collect solution variables into class
         self.collect_results()
                               
-    def solve_trange(self,trange,state,mdot_in=[],u_in=[]):
+    def solve_trange(self,trange,state,**kwargs):
         
+        #Parse keywords arguments
+        self.mdot_in = kwargs.get('mdot_in',[])
+        self.u_in = kwargs.get('u_in',[])
+        self.sa = kwargs.get('sa',None)
+
         #Temperature range (convert to list)
         self.trange = trange
         if not isinstance(self.trange,list):
@@ -513,48 +518,54 @@ class ReactorSolver(object):
         self.state_comp = state[1]
         
         #Initialize flags
-        self.flag_mdot_in = 0
-        self.flag_u_in = 0
+        self.flag_mdot_in = False
+        self.flag_u_in = False
+        self.flag_sa = False
 
         #Test whether a mass flow rate or a velocity was specified
-        if mdot_in != []:
+        if np.asarray(self.mdot_in).size != 0:
             
-            #Save variable within class
-            self.mdot_in = mdot_in
+            #Turn flag single for single input value
+            self.flag_mdot_in = True
             
             #Check if input is a number
             if isinstance(self.mdot_in,(int,float)):
                 #Convert number to list
-                self.mdot_in = list([self.mdot_in])
-                
-                #Turn flag single for single input value
-                self.flag_mdot_in = 1
+                self.mdot_in = list(np.repeat(self.mdot_in,len(self.trange)))    
             else:
                 #Convert array to list
                 self.mdot_in = list(self.mdot_in)
-                
-                #Turn flag single for multiple input values
-                self.flag_mdot_in = 2
 
-        if u_in != []:       
-            #Save variable within class
-            self.u_in = u_in
-            
+        if np.asarray(self.u_in).size != 0:      
+
+            #Turn flag single for single input value
+            self.flag_u_in = True
+                
             #Check if input is a number
             if isinstance(self.u_in,(int,float)):
                 #Convert number to list
-                self.u_in = list([self.u_in])
-                
-                #Turn flag single for single input value
-                self.flag_u_in = 1
+                self.u_in = list(np.repeat(self.u_in,len(self.trange)))
             else:
                 #Convert array to list
                 self.u_in = list(self.u_in)
+
+        #Perform brute force sensitivity analysis. Perturb each reaction by
+        #same factor and computes the normalized sensitivity coefficient for
+        #a user-defined major gas-phase reactant species.
+        if self.sa != None:
                 
-                #Turn flag single for multiple input values
-                self.flag_u_in = 2
-
-
+            #Unpack input. Must be a tuple in the form: (factor,species name)
+            self.factor, name = self.sa
+            
+            #Get major reactant species index
+            self.sp_idx = self.solver._r.gas.species_index(name)
+            
+            #Store sensitivity coefficients within list
+            self.sens_coeffs_all = []
+        
+            #Turn flag for SA
+            self.flag_sa = True
+        
         #Store results within list
         self.output_all = []
 
@@ -567,30 +578,67 @@ class ReactorSolver(object):
             self.solver._r.TPX = self.cstate
             
             #Set reactor inlet flow conditions:
-            if self.flag_mdot_in == 1:
-                #Set inlet mass flow rate [kg/s]
-                self.solver._r.mdot = self.mdot_in[0]
-                
-            #If more than multiple values were supplied
-            elif self.flag_mdot_in == 2:
+            if self.flag_mdot_in == True:
                 #Set inlet mass flow rate [kg/s]
                 self.solver._r.mdot = self.mdot_in[i]
                 
-            if self.flag_u_in == 1:
+            if self.flag_u_in == True:
                 #Set inlet flow velocity [m/s]
-                self.solver._r.u = self.u_in[0]
-
-            #If more than multiple values were supplied
-            elif self.flag_u_in == 2:
-                #Set inlet mass flow rate [kg/s]
                 self.solver._r.u = self.u_in[i]
-                
+            
             #Solve the PFR problem at current temperature
             self.solve() 
             
             #Append dictionary to list
             self.output_all.append(self.output)
+            
+            #Perform brute force SA
+            if self.flag_sa == True:
+                
+                #Compute reactant conversion [-]
+                self.conv_ref = (1.0 
+                                 - self.X[-1,self.sp_idx]/self.X[0,self.sp_idx])
         
+                #Normalized sensitivity coefficients list
+                self.sens_coeffs = []
+                
+                for j in range(self.solver._r.rs.surface.n_reactions):
+                    
+                    #Perturb each reaction sequentially
+                    self.solver._r.rs.surface.set_multiplier(self.factor,j)
+                    
+                    #Current inlet thermodynamic state
+                    self.solver._r.TPX = self.cstate
+                    
+                    #Set reactor inlet flow conditions:
+                    if self.flag_mdot_in == True:
+                        #Set inlet mass flow rate [kg/s]
+                        self.solver._r.mdot = self.mdot_in[i]
+                        
+                    if self.flag_u_in == True:
+                        #Set inlet flow velocity [m/s]
+                        self.solver._r.u = self.u_in[i]
+                     
+                    #Solve the PFR
+                    self.solve()
+        
+                    #Compute ethanol conversion [-]
+                    self.conv_pt = (1.0  
+                                    - self.X[-1,self.sp_idx]/self.X[0,self.sp_idx])
+                    
+                    #Compute difference between reference and perturbed values
+                    self._delta = np.abs(self.conv_ref-self.conv_pt)
+            
+                    #Normalized sensitivity coefficient for ethanol conversion
+                    self.sens_coeffs.append((self.factor*self._delta)/
+                                            (self.conv_ref*(1.0-self.factor)) )
+
+                    #Reset reaction rate multiplier to 1
+                    self.solver._r.rs.surface.set_multiplier(1.0)
+                    
+                #Append to outer list
+                self.sens_coeffs_all.append(np.array(self.sens_coeffs))
+
     def collect_results(self):
         
         #Make reference to output dict
