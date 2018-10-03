@@ -103,20 +103,18 @@ class Washcoat(object):
         #Get surface concentration species in the gas-washcoat interface [kmol/m**3]
         self.c_int = gas.concentrations
         
-        #Prevent zero or negative values in concentration array
-        self.c_int[self.c_int <= 0.0] = 1e-20
-        
-        #Forward rate constant 
-        self.kf = self.gdot_int/self.c_int
-        
+        #Forward rate constant (prevent division errors when concentration is zero)
+        self.kf = np.divide(self.gdot_int,self.c_int,
+                            out=np.zeros_like(self.gdot_int),
+                            where=self.c_int!=0)
+
         #Compute the Thiele modulus  
         self.thiele_mod = self.thickness*np.sqrt(self.kf/self.diff_eff)
-
-        #Prevent zero values in Thiele modulus array
-        self.thiele_mod[self.thiele_mod == 0.0] = 1e-20
-        
-        #Effectiveness factor
-        self.neff = np.tanh(self.thiele_mod)/self.thiele_mod
+       
+        #Effectiveness factor (prevent division errors when Thiele modulus is zero)
+        self.neff = np.divide(np.tanh(self.thiele_mod),self.thiele_mod,
+                              out=np.zeros_like(np.tanh(self.thiele_mod)),
+                              where=self.thiele_mod!=0)
         
         return self.neff
     

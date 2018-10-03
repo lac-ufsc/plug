@@ -1,17 +1,23 @@
 units(length='m', time='s', quantity='kmol', act_energy='J/kmol')
 
 ideal_gas(name='gas',
-          elements="Ar C H He O Pt",
-          species="""CH3CH2OH CH3CHO CH4 H2O CO CO2 H2 AR HE""",
+          elements="O C H He Ar Pt",
+          species="""CH3CH2OH CH4 H2O CO CO2 H2 AR HE""",
           reactions='gas-*',
           transport='Mix',
           initial_state=state(temperature=300.0, pressure=OneAtm))
 
+stoichiometric_solid(name='Pt_bulk',
+          elements="O C H He Ar Pt",
+          density=(21.400, 'g/cm3'),
+          species='PT(B)',
+          initial_state=state(temperature=300.0,pressure=OneAtm))
+
 ideal_interface(name='Pt_surface',
-                elements="Ar C H He O Pt",
-                species="""PT(S) CH3CH2OH(S) CH3CHOH(S) CH3COH(S) CH3CH2O(S) CH3CO(S) CO(S) CH3(S) CH2(S) CH(S) C(S) H2O(S) OH(S) H(S) CO2(S) COOH(S) CH2COH(S) CH3CHO(S) CH2CO(S) CHCO(S)""",
+                elements="O C H He Ar Pt",
+                species="""PT(S) CH3CH2OH(S) CH3CHOH(S) CH3COH(S) CH3CH2O(S) CH3CO(S) CO(S) CH3(S) CH2(S) CH(S) H2O(S) OH(S) H(S) CO2(S) COOH(S) CH2COH(S) CH3CHO(S) CH2CO(S) CHCO(S)""",
                 site_density=2.49081e-08,
-                phases="gas",
+                phases="gas Pt_bulk",
                 reactions='all',
                 initial_state=state(temperature=300.0, pressure=OneAtm))
 
@@ -29,22 +35,6 @@ species(name='CH3CH2OH',
                      [ 6.56243650E+00,  1.52042220E-02, -5.38967950E-06,
                        8.62250110E-10, -5.12897870E-14, -3.15256210E+04,
                       -9.47302020E+00])),
-        transport=gas_transport(geom='nonlinear',
-                                diam=4.530,
-                                well_depth=362.60,
-                                rot_relax=1.5),
-        size=1.0)
-
-species(name='CH3CHO',
-        atoms='H:4 O:1 C:2',
-        thermo=(NASA([200.00, 1000.00],
-                     [ 4.72945950E+00, -3.19328580E-03,  4.75349210E-05,
-                      -5.74586110E-08,  2.19311120E-11, -2.15728780E+04,
-                       4.10301590E+00]),
-                NASA([1000.00, 6000.00],
-                     [ 5.40411080E+00,  1.17230590E-02, -4.22631370E-06,
-                       6.83724510E-10, -4.09848630E-14, -2.25931220E+04,
-                      -3.48079170E+00])),
         transport=gas_transport(geom='nonlinear',
                                 diam=4.530,
                                 well_depth=362.60,
@@ -169,17 +159,17 @@ species(name='HE',
 species(name='PT(S)',
         atoms='Pt:1',
         thermo=(NASA([298.00, 1000.00],
-                     [ 0.00000000E+00,  0.00000000E+00,  0.00000000E+00,
-                       0.00000000E+00,  0.00000000E+00,  0.00000000E+00,
-                       0.00000000E+00]),
+                     [ 1.50563680E+00,  9.21776900E-03, -1.95559000E-05,
+                       2.02033000E-08, -7.25140300E-12, -7.22666100E+02,
+                      -6.68981800E+00]),
                 NASA([1000.00, 2000.00],
-                     [ 0.00000000E+00,  0.00000000E+00,  0.00000000E+00,
-                       0.00000000E+00,  0.00000000E+00,  0.00000000E+00,
-                       0.00000000E+00])),
+                     [ 2.31854600E+00,  1.92942600E-03, -1.68213000E-07,
+                       4.13140200E-11, -1.66929350E-15, -7.63417200E+02,
+                      -9.80247300E+00])),
         size=1.0)
 
 species(name='CH3CH2OH(S)',
-        atoms='H:6 O:1 C:2 Pt:1',
+        atoms='H:6 O:1 C:2',
         thermo=(NASA([100.00, 458.00],
                      [ 3.80676205E+00,  2.38881416E-02, -3.52774847E-05,
                        1.19139145E-07, -1.25133123E-10, -3.44534354E+04,
@@ -191,7 +181,7 @@ species(name='CH3CH2OH(S)',
         size=1.0)
 
 species(name='CH3CHOH(S)',
-        atoms='H:5 O:1 C:2 Pt:1',
+        atoms='H:5 O:1 C:2',
         thermo=(NASA([100.00, 480.00],
                      [ 3.11255108E-01,  4.37059758E-02, -8.58964249E-05,
                        1.64183118E-07, -1.32415371E-10, -3.52838411E+04,
@@ -203,7 +193,7 @@ species(name='CH3CHOH(S)',
         size=1.0)
 
 species(name='CH3COH(S)',
-        atoms='H:4 O:1 C:2 Pt:1',
+        atoms='H:4 O:1 C:2',
         thermo=(NASA([100.00, 482.00],
                      [-3.93770826E-01,  4.96747337E-02, -1.11701448E-04,
                        1.93661187E-07, -1.41282862E-10, -3.39762247E+04,
@@ -215,7 +205,7 @@ species(name='CH3COH(S)',
         size=1.0)
 
 species(name='CH3CH2O(S)',
-        atoms='H:5 O:1 C:2 Pt:1',
+        atoms='H:5 O:1 C:2',
         thermo=(NASA([100.00, 454.00],
                      [ 1.84998226E+00,  3.38831993E-02, -7.61631669E-05,
                        1.87697491E-07, -1.69065281E-10, -2.41921780E+04,
@@ -227,7 +217,7 @@ species(name='CH3CH2O(S)',
         size=1.0)
 
 species(name='CH3CO(S)',
-        atoms='H:3 O:1 C:2 Pt:1',
+        atoms='H:3 O:1 C:2',
         thermo=(NASA([100.00, 466.00],
                      [ 7.37321689E-01,  4.14852800E-02, -1.04011989E-04,
                        1.90242085E-07, -1.40540211E-10, -3.14489963E+04,
@@ -239,7 +229,7 @@ species(name='CH3CO(S)',
         size=1.0)
 
 species(name='CO(S)',
-        atoms='O:1 C:1 Pt:1',
+        atoms='O:1 C:1',
         thermo=(NASA([100.00, 463.00],
                      [-4.14784740E-01,  3.33523193E-02, -8.79697475E-05,
                        1.08865448E-07, -4.92836906E-11, -2.91341588E+04,
@@ -251,7 +241,7 @@ species(name='CO(S)',
         size=1.0)
 
 species(name='CH3(S)',
-        atoms='H:3 C:1 Pt:1',
+        atoms='H:3 C:1',
         thermo=(NASA([100.00, 599.00],
                      [ 1.75333130E+00,  4.47396382E-03,  3.34873851E-05,
                       -6.84746951E-08,  4.10232202E-11, -7.11131301E+03,
@@ -263,7 +253,7 @@ species(name='CH3(S)',
         size=1.0)
 
 species(name='CH2(S)',
-        atoms='H:2 C:1 Pt:1',
+        atoms='H:2 C:1',
         thermo=(NASA([100.00, 516.00],
                      [ 5.88877365E-01,  3.48860436E-03,  5.98006078E-05,
                       -1.52142391E-07,  1.12861945E-10, -1.20832060E+03,
@@ -275,7 +265,7 @@ species(name='CH2(S)',
         size=1.0)
 
 species(name='CH(S)',
-        atoms='H:1 C:1 Pt:1',
+        atoms='H:1 C:1',
         thermo=(NASA([100.00, 531.00],
                      [-3.74556185E-01,  1.38085426E-02,  4.50798538E-06,
                       -5.19100914E-08,  4.75532380E-11, -2.38218692E+03,
@@ -286,20 +276,8 @@ species(name='CH(S)',
                       -9.40954378E+00])),
         size=1.0)
 
-species(name='C(S)',
-        atoms='C:1 Pt:1',
-        thermo=(NASA([100.00, 510.00],
-                     [-7.72957276E-01,  2.29755580E-02, -6.47679500E-05,
-                       9.08798059E-08, -5.07653551E-11,  9.11908219E+03,
-                       1.95186964E+00]),
-                NASA([510.00, 1500.00],
-                     [ 1.62594463E+00,  3.90801887E-03, -4.60502448E-06,
-                       2.51408187E-09, -5.23415875E-13,  8.87072159E+03,
-                      -8.02374765E+00])),
-        size=1.0)
-
 species(name='H2O(S)',
-        atoms='H:2 O:1 Pt:1',
+        atoms='H:2 O:1',
         thermo=(NASA([100.00, 559.00],
                      [ 8.69058284E-01,  2.97266852E-02, -7.78989494E-05,
                        1.03856456E-07, -5.39607416E-11, -3.37257849E+04,
@@ -311,7 +289,7 @@ species(name='H2O(S)',
         size=1.0)
 
 species(name='OH(S)',
-        atoms='H:1 O:1 Pt:1',
+        atoms='H:1 O:1',
         thermo=(NASA([100.00, 573.00],
                      [ 6.54723457E-01,  1.98682314E-02, -4.44083794E-05,
                        5.21580832E-08, -2.52220516E-11, -2.11373500E+04,
@@ -323,7 +301,7 @@ species(name='OH(S)',
         size=1.0)
 
 species(name='H(S)',
-        atoms='H:1 Pt:1',
+        atoms='H:1',
         thermo=(NASA([100.00, 460.00],
                      [-6.74351662E-01,  7.18354120E-03,  1.25367960E-05,
                       -6.75893723E-08,  6.76381809E-11, -5.07900562E+03,
@@ -335,7 +313,7 @@ species(name='H(S)',
         size=1.0)
 
 species(name='CO2(S)',
-        atoms='O:2 C:1 Pt:1',
+        atoms='O:2 C:1',
         thermo=(NASA([100.00, 502.00],
                      [ 1.84294484E+00,  1.76419205E-02, -2.82198384E-05,
                        2.05570939E-08, -2.27872818E-12, -4.45113667E+04,
@@ -347,7 +325,7 @@ species(name='CO2(S)',
         size=1.0)
 
 species(name='COOH(S)',
-        atoms='H:1 O:2 C:1 Pt:1',
+        atoms='H:1 O:2 C:1',
         thermo=(NASA([100.00, 487.00],
                      [-9.53720531E-01,  4.98184488E-02, -1.28727019E-04,
                        1.90798944E-07, -1.16312532E-10, -5.29463448E+04,
@@ -359,7 +337,7 @@ species(name='COOH(S)',
         size=1.0)
 
 species(name='CH2COH(S)',
-        atoms='H:3 O:1 C:2 Pt:2',
+        atoms='H:3 O:1 C:2',
         thermo=(NASA([100.00, 603.00],
                      [-9.44757159E-03,  2.64140823E-02,  1.21136949E-05,
                       -6.84541683E-08,  4.91498203E-11, -2.93673032E+04,
@@ -371,7 +349,7 @@ species(name='CH2COH(S)',
         size=2.0)
 
 species(name='CH3CHO(S)',
-        atoms='H:4 O:1 C:2 Pt:2',
+        atoms='H:4 O:1 C:2',
         thermo=(NASA([100.00, 482.00],
                      [ 3.53742534E-01,  3.99604555E-02, -7.55905995E-05,
                        1.37255167E-07, -1.08728235E-10, -2.61895179E+04,
@@ -383,7 +361,7 @@ species(name='CH3CHO(S)',
         size=2.0)
 
 species(name='CH2CO(S)',
-        atoms='H:2 O:1 C:2 Pt:2',
+        atoms='H:2 O:1 C:2',
         thermo=(NASA([100.00, 586.00],
                      [ 4.56568281E-01,  2.48024776E-02, -2.11841615E-06,
                       -3.99388736E-08,  3.31799300E-11, -2.50450452E+04,
@@ -395,7 +373,7 @@ species(name='CH2CO(S)',
         size=2.0)
 
 species(name='CHCO(S)',
-        atoms='H:1 O:1 C:2 Pt:2',
+        atoms='H:1 O:1 C:2',
         thermo=(NASA([100.00, 515.00],
                      [ 1.78451965E-01,  1.98009516E-02,  2.72189658E-05,
                       -1.18360402E-07,  9.89052488E-11, -2.02442166E+04,
@@ -406,107 +384,107 @@ species(name='CHCO(S)',
                       -1.00251002E+01])),
         size=2.0)
 
+species(name='PT(B)',
+        atoms='Pt:1',
+        thermo=(NASA([298.00, 1000.00],
+                     [ 1.50563680E+00,  9.21776900E-03, -1.95559000E-05,
+                       2.02033000E-08, -7.25140300E-12, -7.22666100E+02,
+                      -6.68981800E+00]),
+                NASA([1000.00, 2000.00],
+                     [ 2.31854600E+00,  1.92942600E-03, -1.68213000E-07,
+                       4.13140200E-11, -1.66929350E-15, -7.63417200E+02,
+                      -9.80247300E+00])),
+        size=1.0)
+
 #-------------------------------------------------------------------------------
 # Reaction data
 #-------------------------------------------------------------------------------
 disable_motz_wise()
 
 # Pt_surface Reaction 1
-surface_reaction('CH3CH2OH + PT(S) <=> CH3CH2OH(S)', stick(0.5, 0.0, 0.0),
+surface_reaction('CH3CH2OH + PT(S) <=> CH3CH2OH(S) + PT(B)', stick(0.5, 0.0, 0.0),
                  id='Pt_surface-1')
 
 # Pt_surface Reaction 2
-surface_reaction('CH3CHO + 2 PT(S) <=> CH3CHO(S)', stick(0.5, 0.0, 0.0),
+surface_reaction('CH4 + 2 PT(S) <=> CH3(S) + H(S) + 2 PT(B)', stick(0.5, 0.0, 61462960.0),
                  id='Pt_surface-2')
 
 # Pt_surface Reaction 3
-surface_reaction('CH4 + 2 PT(S) <=> CH3(S) + H(S)', stick(0.5, 0.0, 61462960.0),
+surface_reaction('H2 + 2 PT(S) <=> 2 H(S) + 2 PT(B)', stick(0.5, 0.0, 0.0),
                  id='Pt_surface-3')
 
 # Pt_surface Reaction 4
-surface_reaction('H2 + 2 PT(S) <=> 2 H(S)', stick(0.5, 0.0, 0.0),
+surface_reaction('CO + PT(S) <=> CO(S) + PT(B)', stick(0.5, 0.0, 0.0),
                  id='Pt_surface-4')
 
 # Pt_surface Reaction 5
-surface_reaction('CO + PT(S) <=> CO(S)', stick(0.5, 0.0, 0.0),
+surface_reaction('CO2 + PT(S) <=> CO2(S) + PT(B)', stick(0.5, 0.0, 0.0),
                  id='Pt_surface-5')
 
 # Pt_surface Reaction 6
-surface_reaction('CO2 + PT(S) <=> CO2(S)', stick(0.5, 0.0, 0.0),
+surface_reaction('H2O + PT(S) <=> H2O(S) + PT(B)', stick(0.5, 0.0, 0.0),
                  id='Pt_surface-6')
 
 # Pt_surface Reaction 7
-surface_reaction('H2O + PT(S) <=> H2O(S)', stick(0.5, 0.0, 0.0),
+surface_reaction('CH3CH2OH(S) + PT(S) <=> CH3CHOH(S) + H(S) + PT(B)',[8.37e+17, 1.0, 69119680.0],
                  id='Pt_surface-7')
 
 # Pt_surface Reaction 8
-surface_reaction('CH3CH2OH(S) + PT(S) <=> CH3CHOH(S) + H(S)',[8.37e+17, 1.0, 69119680.0],
+surface_reaction('CH3CHOH(S) + PT(S) <=> CH3COH(S) + H(S) + PT(B)',[8.37e+17, 1.0, 52383680.0],
                  id='Pt_surface-8')
 
 # Pt_surface Reaction 9
-surface_reaction('CH3CHOH(S) + PT(S) <=> CH3COH(S) + H(S)',[8.37e+17, 1.0, 52383680.0],
+surface_reaction('CH3CH2O(S) + 2 PT(S) <=> CH3CHO(S) + H(S) + 2 PT(B)',[3.36e+25, 1.0, 0.0],
                  id='Pt_surface-9')
 
 # Pt_surface Reaction 10
-surface_reaction('CH3CH2O(S) + 2 PT(S) <=> CH3CHO(S) + H(S)',[3.36e+25, 1.0, 0.0],
+surface_reaction('CH3CHO(S) <=> CH3CO(S) + H(S)',[20800000000.0, 1.0, 13849040.0],
                  id='Pt_surface-10')
 
 # Pt_surface Reaction 11
-surface_reaction('CH3CHO(S) <=> CH3CO(S) + H(S)',[20800000000.0, 1.0, 13849040.0],
+surface_reaction('CH3COH(S) + 2 PT(S) <=> CH2COH(S) + H(S) + 2 PT(B)',[3.36e+25, 1.0, 75353840.0],
                  id='Pt_surface-11')
 
 # Pt_surface Reaction 12
-surface_reaction('CH3COH(S) + 2 PT(S) <=> CH2COH(S) + H(S)',[3.36e+25, 1.0, 75353840.0],
+surface_reaction('CH3CO(S) + 2 PT(S) <=> CH2CO(S) + H(S) + 2 PT(B)',[3.36e+25, 1.0, 94223680.0],
                  id='Pt_surface-12')
 
 # Pt_surface Reaction 13
-surface_reaction('CH3CO(S) + 2 PT(S) <=> CH2CO(S) + H(S)',[3.36e+25, 1.0, 94223680.0],
+surface_reaction('CH2CO(S) + PT(S) <=> CHCO(S) + H(S) + PT(B)',[8.37e+17, 1.0, 75939600.0],
                  id='Pt_surface-13')
 
 # Pt_surface Reaction 14
-surface_reaction('CH2CO(S) + PT(S) <=> CHCO(S) + H(S)',[8.37e+17, 1.0, 75939600.0],
+surface_reaction('CH3(S) + PT(S) <=> CH2(S) + H(S) + PT(B)',[8.37e+17, 1.0, 80918560.0],
                  id='Pt_surface-14')
 
 # Pt_surface Reaction 15
-surface_reaction('CH3(S) + PT(S) <=> CH2(S) + H(S)',[8.37e+17, 1.0, 80918560.0],
+surface_reaction('CH2(S) + PT(S) <=> CH(S) + H(S) + PT(B)',[8.37e+17, 1.0, 16066560.0],
                  id='Pt_surface-15')
 
 # Pt_surface Reaction 16
-surface_reaction('CH2(S) + PT(S) <=> CH(S) + H(S)',[8.37e+17, 1.0, 16066560.0],
+surface_reaction('CH3CH2OH(S) + PT(S) <=> CH3CH2O(S) + H(S) + PT(B)',[8.37e+17, 1.0, 77947920.0],
                  id='Pt_surface-16')
 
 # Pt_surface Reaction 17
-surface_reaction('CH(S) + PT(S) <=> C(S) + H(S)',[8.37e+17, 1.0, 124641360.0],
+surface_reaction('CH3COH(S) + PT(S) <=> CH3CO(S) + H(S) + PT(B)',[8.37e+17, 1.0, 17656480.0],
                  id='Pt_surface-17')
 
 # Pt_surface Reaction 18
-surface_reaction('CH3CH2OH(S) + PT(S) <=> CH3CH2O(S) + H(S)',[8.37e+17, 1.0, 77947920.0],
+surface_reaction('CH2COH(S) + PT(S) <=> CH2CO(S) + H(S) + PT(B)',[8.37e+17, 1.0, 50333520.0],
                  id='Pt_surface-18')
 
 # Pt_surface Reaction 19
-surface_reaction('CH3CHOH(S) + 2 PT(S) <=> CH3CHO(S) + H(S)',[3.36e+25, 1.0, 64433600.0],
+surface_reaction('CHCO(S) <=> CH(S) + CO(S)',[20800000000.0, 1.0, 90834640.0],
                  id='Pt_surface-19')
 
 # Pt_surface Reaction 20
-surface_reaction('CH3COH(S) + PT(S) <=> CH3CO(S) + H(S)',[8.37e+17, 1.0, 17656480.0],
+surface_reaction('H2O(S) + PT(S) <=> H(S) + OH(S) + PT(B)',[8.37e+17, 1.0, 66567440.0],
                  id='Pt_surface-20')
 
 # Pt_surface Reaction 21
-surface_reaction('CH2COH(S) + PT(S) <=> CH2CO(S) + H(S)',[8.37e+17, 1.0, 50333520.0],
+surface_reaction('CO(S) + OH(S) + PT(B) <=> COOH(S) + PT(S)',[8.37e+20, 1.0, 43890160.0],
                  id='Pt_surface-21')
 
 # Pt_surface Reaction 22
-surface_reaction('CHCO(S) <=> CH(S) + CO(S)',[20800000000.0, 1.0, 90834640.0],
+surface_reaction('COOH(S) + PT(S) <=> CO2(S) + H(S) + PT(B)',[8.37e+20, 1.0, 63680480.0],
                  id='Pt_surface-22')
-
-# Pt_surface Reaction 23
-surface_reaction('H2O(S) + PT(S) <=> H(S) + OH(S)',[8.37e+17, 1.0, 66567440.0],
-                 id='Pt_surface-23')
-
-# Pt_surface Reaction 24
-surface_reaction('CO(S) + OH(S) <=> COOH(S) + PT(S)',[8.37e+20, 1.0, 43890160.0],
-                 id='Pt_surface-24')
-
-# Pt_surface Reaction 25
-surface_reaction('COOH(S) + PT(S) <=> CO2(S) + H(S)',[8.37e+20, 1.0, 63680480.0],
-                 id='Pt_surface-25')

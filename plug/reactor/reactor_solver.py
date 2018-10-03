@@ -234,6 +234,8 @@ class ReactorSolverBase(object):
                 self._Xwc = None
                 self._covs_wc = None
                 
+                
+                
         #Store results into dict
         self._output = dict()
         
@@ -260,8 +262,24 @@ class ReactorSolverBase(object):
             self._output['coverages_wc'] = self._covs_wc
             self._output['wg_mix_wc'] = self._wg_mix_wc
             self._output['Xwc'] = self._Xwc
-            self._output['Ywc'] = self._Ywc
-
+            self._output['Ywc'] = self._Ywc            
+            #Internal mass transfer data: Thiele modulus and effectiveness
+            #factor.
+            if self._r.rs.flag_int_mt != 0:
+                #If detailed washcoat model is employed, compute internal mass 
+                #transfer parameters using gas-solid interface properties 
+                if self._r.rs.flag_int_mt == 2:
+                    #Set gas phase object composition to that of gas-solid interface
+                    self._r.rs.wc._gas.set_unnormalized_mass_fractions(
+                                                         self._r.rs.wc.y[0,:])
+                    #Compute the Thiele modulus and effectiveness factor
+                    self._r.rs.wc.get_effectiveness_factor(self._r.rs.wc._gas,
+                                                           self._r.rs.wc.gdot[0,:])  
+                    
+                #Save internal mass transfe variables into dict
+                self._output['thiele_mod'] = self._r.rs.wc.thiele_mod
+                self._output['neff'] = self._r.rs.wc.neff
+                
 '''Reactor solver class using scikits.odes wrapper for SUNDIALS'''
 import scikits.odes.sundials.ida as ida
 import scikits.odes.sundials.cvode as cvode
@@ -549,9 +567,9 @@ class ReactorSolver(object):
                 #Convert array to list
                 self.u_in = list(self.u_in)
 
-        #Perform brute force sensitivity analysis. Perturb each reaction by
-        #same factor and computes the normalized sensitivity coefficient for
-        #a user-defined major gas-phase reactant species.
+        #Perform brute force sensitivity analysis. Perturb each surface 
+        #reaction by same factor and compute the normalized sensitivity 
+        #coefficient for a user-defined gas-phase reactant species.
         if self.sa != None:
                 
             #Unpack input. Must be a tuple in the form: (factor,species name)
@@ -561,7 +579,8 @@ class ReactorSolver(object):
             self.sp_idx = self.solver._r.gas.species_index(name)
             
             #Store sensitivity coefficients within list
-            self.sens_coeffs_all = []
+            self.sa_coeffs = []
+            self.overall_sa_coeffs = []
         
             #Turn flag for SA
             self.flag_sa = True
@@ -595,13 +614,18 @@ class ReactorSolver(object):
             #Perform brute force SA
             if self.flag_sa == True:
                 
+                #Molar fractions at the reactor outlet
+                self._Xout_ref = self.X[-1,:]
+                    
                 #Compute reactant conversion [-]
                 self.conv_ref = (1.0 
                                  - self.X[-1,self.sp_idx]/self.X[0,self.sp_idx])
         
                 #Normalized sensitivity coefficients list
-                self.sens_coeffs = []
+                coeffs = []
+                overall_coeffs = []
                 
+                #Loop over all surface reactions
                 for j in range(self.solver._r.rs.surface.n_reactions):
                     
                     #Perturb each reaction sequentially
@@ -621,24 +645,37 @@ class ReactorSolver(object):
                      
                     #Solve the PFR
                     self.solve()
-        
-                    #Compute ethanol conversion [-]
+
+                    #Molar fractions at the reactor outlet
+                    self._Xout_pt = self.X[-1,:]
+                
+                    #Compute perturbed reactant conversion [-]
                     self.conv_pt = (1.0  
                                     - self.X[-1,self.sp_idx]/self.X[0,self.sp_idx])
                     
                     #Compute difference between reference and perturbed values
                     self._delta = np.abs(self.conv_ref-self.conv_pt)
-            
-                    #Normalized sensitivity coefficient for ethanol conversion
-                    self.sens_coeffs.append((self.factor*self._delta)/
+                    self._delta_x = np.abs(self._Xout_ref-self._Xout_pt)
+                    
+                    #Normalized sensitivity coefficients 
+                    coeffs.append((self.factor*self._delta)/
                                             (self.conv_ref*(1.0-self.factor)) )
-
+                    
+                    #Auxiliary variables
+                    _a = self.factor*self._delta_x
+                    _b = self._Xout_ref*(1.0-self.factor) 
+                    
+                    #Overall sensitivity coefficients 
+                    overall_coeffs.append(np.sum(np.divide(_a,_b,
+                                        out=np.zeros_like(_a),where=_b!=0)**2))
+                    
                     #Reset reaction rate multiplier to 1
                     self.solver._r.rs.surface.set_multiplier(1.0)
                     
-                #Append to outer list
-                self.sens_coeffs_all.append(np.array(self.sens_coeffs))
-
+                #Append SA coefficients to outer list
+                self.sa_coeffs.append(np.array(coeffs))
+                self.overall_sa_coeffs.append(np.array(overall_coeffs))
+                
     def collect_results(self):
         
         #Make reference to output dict

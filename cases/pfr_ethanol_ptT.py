@@ -10,8 +10,8 @@ surf_name = 'Pt_surface'
 bulk_name = 'Pt_bulk'
 
 #### Coverage dependency matrix file ####: 
-cov_file = ('/home/tpcarvalho/carva/python_data/kinetic_mechanisms/input_files'
-            '/cov_matrix/covmatrix_et_pt.inp')
+cov_file = ('/home/tpcarvalho/carva/python_scripts/cantera/pfr/plug'
+            '/data/cov_matrix/covmatrix_et_pt.inp')
 
 #### Save results into file? ####
 savefile = 0
