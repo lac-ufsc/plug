@@ -200,3 +200,7 @@ This example solves a plug flow reactor problem, where the chemistry is surface 
     ax1.axis((0.0,zcoord[-1],800,3200))
     
     plt.show()
+
+## Note about the WGS analysis scripts
+
+Note that in order to execute several of the scripts that use a global simplified expression for WGS over Ni surface, the user has to first execute the scripts using the full and reduced WGS microkinetic mechanisms and save the data using the pickle module. Scripts using the simplified expression need to access this data in order to interpolate values for the surface coverages. Note also that both simulations must be performed at the same or similar operational conditions. 
