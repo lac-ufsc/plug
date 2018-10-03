@@ -1,17 +1,20 @@
 import numpy as np
 import cantera as ct
 import plug as pfr
+import os
 import time
 start = time.time()  
 
 #### Input mechanism data ####:   
 input_file = 'wgs_ni_redux_nobulk.cti'        
 surf_name = 'Ni_surface'
-bulk_name = 'Ni_bulk'
+
+#### Data files path ####:
+basepath = os.path.dirname(__file__)
+filepath = os.path.join(basepath,'../../..','data')
 
 #### Coverage dependency matrix file ####: 
-cov_file = ('/home/tpcarvalho/carva/python_data/kinetic_mechanisms/'
-            'input_files/cov_matrix/covmatrix_wgs_ni.inp')
+cov_file = os.path.join(filepath,'cov_matrix/covmatrix_wgs_ni.inp')
 
 #### Save results into file? ####
 savefile = 0
@@ -56,8 +59,8 @@ rs = pfr.ReactingSurface(r,surf,
 #Create a ReactorSolver object
 sim = pfr.ReactorSolver(r,
                         tcovs = 1e02,
-                        atol = 1e-12,
-                        rtol = 1e-06,
+                        atol = 1e-14,
+                        rtol = 1e-07,
                         grid = 250,
                         max_steps = 5000,
                         solver_type = 'dae')

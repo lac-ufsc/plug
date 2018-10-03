@@ -1,6 +1,7 @@
 import cantera as ct
 import numpy as np
 import plug as pfr
+import os
 import time
 start = time.time()  
 
@@ -9,9 +10,12 @@ input_file = 'wgs_nib.cti'
 surf_name = 'Ni_surface'
 bulk_name = 'Ni_bulk'
 
+#### Data files path ####:
+basepath = os.path.dirname(__file__)
+filepath = os.path.join(basepath,'..','data')
+
 #### Coverage dependency matrix file ####: 
-cov_file = ('/home/tpcarvalho/carva/python_data/kinetic_mechanisms/'
-            'input_files/cov_matrix/covmatrix_wgs_ni.inp')
+cov_file = os.path.join(filepath,'cov_matrix/covmatrix_wgs_ni.inp')
 
 #### Save results into file? ####
 savefile = 0
@@ -45,7 +49,7 @@ mdot0 = 3*1.66667e-5*gas_in.density
 
 #Temperature range to simulate
 Trange = [T_in]
-#Trange = list(np.linspace(273.15+300,273.15+700,50))
+Trange = list(np.linspace(273.15+300,273.15+700,50))
 #u_in = np.geomspace(1,1e05,len(Trange))*1.0
 
 #Initialize reactor                                          
@@ -205,8 +209,8 @@ if vis==1:
     else:
         #Import paper experimental data from CSV file
         import csv
-        exp_data=[]
-        filename = (savepath+'wheeler_co_conv_ni.csv') 
+        exp_data=[]  
+        filename = os.path.join(filepath,'exp_data/wheeler_co_conv_ni.csv')
         with open(filename, 'rt') as f:
             reader = csv.reader(f)
             for row in reader:

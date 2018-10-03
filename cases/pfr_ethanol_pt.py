@@ -1,6 +1,7 @@
 import numpy as np
 import cantera as ct
 import plug as pfr
+import os
 import time
 start = time.time()  
 
@@ -9,9 +10,12 @@ input_file = 'ethanol_ptb.cti'
 surf_name = 'Pt_surface'
 bulk_name = 'Pt_bulk'
 
+#### Data files path ####:
+basepath = os.path.dirname(__file__)
+filepath = os.path.join(basepath,'..','data')
+
 #### Coverage dependency matrix file ####: 
-cov_file = ('/home/tpcarvalho/carva/python_data/kinetic_mechanisms/input_files'
-            '/cov_matrix/covmatrix_et_pt.inp')
+cov_file = os.path.join(filepath,'cov_matrix/covmatrix_et_pt.inp')
 
 #### Save results into file? ####
 savefile = 0
@@ -191,7 +195,7 @@ if vis==1:
         #Import paper experimental data from CSV file
         import csv
         exp_data=[]
-        filename = ('/home/tpcarvalho/carva/python_data/ethanol/et_conv_pt.csv') 
+        filename = os.path.join(filepath,'exp_data/basagiannis_et_conv_pt.csv')
         with open(filename, 'rt') as f:
             reader = csv.reader(f)
             for row in reader:

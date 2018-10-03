@@ -1,6 +1,7 @@
 import numpy as np
 import cantera as ct
 import plug as pfr
+import os
 import time
 start = time.time()  
 
@@ -8,9 +9,12 @@ start = time.time()
 input_file = 'wgs_ni_redux_nobulk.cti'        
 surf_name = 'Ni_surface'
 
+#### Data files path ####:
+basepath = os.path.dirname(__file__)
+filepath = os.path.join(basepath,'../../..','data')
+
 #### Coverage dependency matrix file ####: 
-cov_file = ('/home/tpcarvalho/carva/python_data/kinetic_mechanisms/'
-            'input_files/cov_matrix/covmatrix_wgs_ni.inp')
+cov_file = os.path.join(filepath,'cov_matrix/covmatrix_wgs_ni.inp')
 
 #### Save results into file? ####
 savefile = 0
@@ -42,8 +46,8 @@ vdot0 = np.array([0.03,0.3,3,30,300,3000])
 mdot0 = vdot0*1.66667e-5*gas_in.density
 
 #Temperature range to simulate
-#Trange = [T_in]
-Trange = list(np.linspace(273.15+300,273.15+700,60))
+Trange = [T_in]
+Trange = list(np.linspace(273.15+300,273.15+700,50))
 #u_in = np.geomspace(1,1e05,len(Trange))*1.0
 
 #Initialize reactor                                          
@@ -57,9 +61,9 @@ rs = pfr.ReactingSurface(r,surf,
 
 #Create a ReactorSolver object
 sim = pfr.ReactorSolver(r,
-                        tcovs = 1e04,
-                        atol = 1e-12,
-                        rtol = 1e-06,
+                        tcovs = 1e02,
+                        atol = 1e-14,
+                        rtol = 1e-07,
                         grid = 250,
                         max_steps = 5000,
                         solver_type = 'dae')

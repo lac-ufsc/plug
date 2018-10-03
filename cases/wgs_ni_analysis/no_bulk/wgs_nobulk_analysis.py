@@ -1,6 +1,7 @@
 import numpy as np
 import cantera as ct
 import plug as pfr
+import os
 import time
 start = time.time()  
 
@@ -8,9 +9,12 @@ start = time.time()
 input_file = 'wgs_ni_redux_nobulk.cti'        
 surf_name = 'Ni_surface'
 
+#### Data files path ####:
+basepath = os.path.dirname(__file__)
+filepath = os.path.join(basepath,'../../..','data')
+
 #### Coverage dependency matrix file ####: 
-cov_file = ('/home/tpcarvalho/carva/python_data/kinetic_mechanisms/'
-            'input_files/cov_matrix/covmatrix_wgs_ni.inp')
+cov_file = os.path.join(filepath,'cov_matrix/covmatrix_wgs_ni.inp')
 
 #Export figure? 
 exp_fig = 0

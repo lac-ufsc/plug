@@ -5,16 +5,20 @@ import plug as pfr
 from scikits.odes import ode
 from scipy.interpolate import interp1d 
 from wgs_pfr_class import PFR_simple
+import os
 import time
-start = time.time()   
-        
-#### Input mechanism data ####:       
-input_file = 'wgs_ni_redux_nobulk.cti'  
+start = time.time()  
+
+#### Input mechanism data ####:   
+input_file = 'wgs_ni_redux_nobulk.cti'        
 surf_name = 'Ni_surface'
 
+#### Data files path ####:
+basepath = os.path.dirname(__file__)
+filepath = os.path.join(basepath,'../../../..','data')
+
 #### Coverage dependency matrix file ####: 
-cov_file = ('/home/tpcarvalho/carva/python_data/kinetic_mechanisms/'
-            'input_files/cov_matrix/covmatrix_wgs_ni.inp')
+cov_file = os.path.join(filepath,'cov_matrix/covmatrix_wgs_ni.inp')
 
 #### Save results into file? ####
 savefile = 0
@@ -236,7 +240,7 @@ if vis == 1:
         
         #Import paper experimental data from CSV file
         exp_data=[]
-        filename = ('/home/tpcarvalho/carva/python_data/wgs_ni/wheeler_co_conv_ni.csv') 
+        filename = os.path.join(filepath,'exp_data/wheeler_co_conv_ni.csv') 
         with open(filename, 'rt') as f:
             reader = csv.reader(f)
             for row in reader:

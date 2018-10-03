@@ -24,6 +24,8 @@ Package requirements:
 * assimulo
 * scikits.odes
 
+In order to use the input files provided with the code along with Cantera, it is necessary to add the data directory to Cantera's search path, e.g.: export CANTERA_DATA="/your-folder/plug/data/:$CANTERA_DATA"
+
 # Usage
 
 ## PFR with homogeneous reactions

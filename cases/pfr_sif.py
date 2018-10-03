@@ -1,6 +1,7 @@
 import cantera as ct
 import numpy as np
 import plug as pfr
+import os
 import time
 start = time.time()  
 
@@ -8,6 +9,10 @@ start = time.time()
 input_file = 'sif_gas.cti'
 surf_name = 'SI3N4'
 bulk_name = ['N(D)','SI(D)']
+
+#### Data files path ####:
+basepath = os.path.dirname(__file__)
+filepath = os.path.join(basepath,'..','data')
 
 #Load phases solution objects
 gas = ct.Solution(input_file)
@@ -89,7 +94,7 @@ dP = (P_in - gas.P)/133.322
 print('Time elapsed: {0:0.8f} seconds'.format(time.time() - start)) 
 
 #Open PLUG CHEMKIN manual results
-filename='/home/tpcarvalho/carva/python_data/SiF_PLUG_results.csv'
+filename = os.path.join(filepath,'exp_data/SiF_PLUG_results.csv')
 import csv
 ref_data=[]
 with open(filename, 'rt') as f:

@@ -1,12 +1,17 @@
 import cantera as ct
 import numpy as np
 import plug as pfr
+import os
 import time
 start = time.time()  
 
 #### Input mechanism data ####:      
 input_file = 'ch4_pt.cti' 
 surf_name = 'PT_SURFACE'
+
+#### Data files path ####:
+basepath = os.path.dirname(__file__)
+filepath = os.path.join(basepath,'..','data/exp_data/') 
 
 #Load phases solution objects
 gas = ct.Solution(input_file)
@@ -15,23 +20,20 @@ surf = ct.Interface(input_file,surf_name,[gas])
 #Select which case to run
 case = 1
 
-#Data files path
-filepath = '/home/tpcarvalho/carva/python_data/ch4_pt/'
-
 #Re = 200
 if case == 1:
     vis = 1
     #Inlet pressure [Pa]
     P_in = 101325.0                   
     #Import reference data
-    filename = (filepath+'Re200_Yk.csv')
+    filename = (filepath+'ch4_pt_Re200_Yk.csv')
 #Re = 2000
 elif case == 2:
     vis = 1
     #Inlet pressure [Pa]
     P_in = 101325.0*10                   
     #Import reference data
-    filename = (filepath+'Re2000_Yk.csv') 
+    filename = (filepath+'ch4_pt_Re2000_Yk.csv') 
 
 #Re = 2000 (show coverages)
 elif case == 3:
@@ -39,7 +41,7 @@ elif case == 3:
     #Inlet pressure [Pa]
     P_in = 101325*10                   
     #Import reference data
-    filename = (filepath+'Re2000_covs.csv') 
+    filename = (filepath+'ch4_pt_Re2000_covs.csv') 
     
 #### Current thermo state ####:  
 T_in = 1290                #Inlet temperature [K]

@@ -1,6 +1,7 @@
 import numpy as np
 import cantera as ct
 import plug as pfr
+import os
 import time
 start = time.time()  
 
@@ -9,9 +10,12 @@ input_file0= 'ethanol_pt.cti'
 input_file = 'ethanol_pt_redux.cti'    
 surf_name = 'Pt_surface'
 
+#### Data files path ####:
+basepath = os.path.dirname(__file__)
+filepath = os.path.join(basepath,'../..','data')
+
 #### Coverage dependency matrix file ####: 
-cov_file = ('/home/tpcarvalho/carva/python_scripts/cantera/pfr/plug'
-            '/data/cov_matrix/covmatrix_et_pt.inp')
+cov_file = os.path.join(filepath,'cov_matrix/covmatrix_et_pt.inp')
 
 #Load phases solution objects
 gas0 = ct.Solution(input_file0)
@@ -41,7 +45,7 @@ mdot0 = 0.12*1.66667e-5*gas_in.density
 
 #temperature range to simulate
 Trange = [T_in]
-Trange = np.linspace(273.15+250,273.15+450,10)
+#Trange = np.linspace(273.15+250,273.15+450,10)
 
 #Catalytic area per volume [m**-1]
 cat_area = 8.5e04
