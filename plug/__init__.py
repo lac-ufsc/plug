@@ -9,6 +9,7 @@ from .reactor.washcoat_model import Washcoat
 from .kinetics.surf_phase import SurfacePhase
 from .utils.reduce_mech import ReduceMechanism
 from .utils import pca_reduction
+from .utils.washcoat_area import WashcoatArea
 
 
 
