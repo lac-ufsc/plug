@@ -103,15 +103,14 @@ zcoord = sim0.z*1e03
 #Get reactor variables from list
 X0 = []
 covs0 = []
-for o in output0:
-    X0.append(o['X'])
-    covs0.append(o['coverages'])
-    
 X = []
 covs = []
-for o in output:
-    X.append(o['X'])
-    covs.append(o['coverages'])
+
+for i in range(len(output0)):
+    X0.append(output0[i]['X'])
+    covs0.append(output0[i]['coverages'])
+    X.append(output[i]['X'])
+    covs.append(output[i]['coverages'])
 
 X0 = np.array(X0)
 covs0 = np.array(covs0)

@@ -96,7 +96,8 @@ class ReactorSolverBase(object):
         if self._r.rs != None:
 
             #Advance coverages in time to pseudo-steady-state
-            self._r.rs.surface.advance_coverages(self.tcovs)
+            if self.tcovs != 0.0:
+                self._r.rs.surface.advance_coverages(self.tcovs)
             
             #Get maximum coverage index
             self._r.rs.get_max_coverage()

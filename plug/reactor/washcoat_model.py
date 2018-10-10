@@ -109,12 +109,12 @@ class Washcoat(object):
                             where=self.c_int!=0)
 
         #Compute the Thiele modulus  
-        self.thiele_mod = self.thickness*np.sqrt(self.kf/self.diff_eff)
+        self.thiele_mod = self.thickness*np.sqrt(np.abs(self.kf)/self.diff_eff)
        
         #Effectiveness factor (prevent division errors when Thiele modulus is zero)
         self.neff = np.divide(np.tanh(self.thiele_mod),self.thiele_mod,
                               out=np.zeros_like(np.tanh(self.thiele_mod)),
-                              where=self.thiele_mod!=0)
+                              where=self.thiele_mod!=0.0)
         
         return self.neff
     

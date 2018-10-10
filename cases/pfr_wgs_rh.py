@@ -32,28 +32,28 @@ case = 1
 if case==1:
     ### Case09 - WGS ###
     X_in = {'H2O':0.113, 'CO':0.112}         
-    filename = os.path.join(filepath,'exp_data/wgs_rh_case9.csv' )
+    filename = os.path.join(filepath,'exp_data/wgs_rh_case9.csv')
     #Washcoat parameters:
     wc_spc = 'CO'
     
 elif case==2:
     ### Case10 - WGS ###            
     X_in = {'H2O':0.102, 'CO':0.1008, 'CO2':0.02}   
-    filename = os.path.join(filepath,'exp_data/wgs_rh_case10.csv' ) 
+    filename = os.path.join(filepath,'exp_data/wgs_rh_case10.csv') 
     #Washcoat parameters:
     wc_spc = 'CO'
     
 elif case==3:
     ### Case11 - RWGS ###    
     X_in = {'H2':0.1040, 'CO2':0.1088}
-    filename = os.path.join(filepath,'exp_data/wgs_rh_case11.csv' )
+    filename = os.path.join(filepath,'exp_data/wgs_rh_case11.csv')
     #Washcoat parameters:
     wc_spc = 'CO2'
     
 elif case==4:
     ### Case12 - RWGS ###   
     X_in = {'H2':0.1003, 'CO2':0.0952, 'CO':0.0204}
-    filename = os.path.join(filepath,'exp_data/wgs_rh_case12.csv' )
+    filename = os.path.join(filepath,'exp_data/wgs_rh_case12.csv')
     #Washcoat parameters:
     wc_spc = 'CO2'
 
