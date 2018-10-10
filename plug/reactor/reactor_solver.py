@@ -1,6 +1,9 @@
 import numpy as np
-from plug.reactor.flow_reactor import ScikitsODE, ScikitsDAE, AssimuloODE, AssimuloDAE
-        
+from plug.reactor.flow_reactor import ScikitsODE, ScikitsDAE
+import importlib
+assimulo_spec = importlib.util.find_spec('assimulo')
+assimulo_found = assimulo_spec is not None
+            
 class ReactorSolverBase(object):
     '''########################################################################
     Base class for the PFR solver. Two implementations can be used, the one by
@@ -234,9 +237,7 @@ class ReactorSolverBase(object):
                 self._wg_mix_wc  = None
                 self._Xwc = None
                 self._covs_wc = None
-                
-                
-                
+                               
         #Store results into dict
         self._output = dict()
         
@@ -280,206 +281,7 @@ class ReactorSolverBase(object):
                 #Save internal mass transfe variables into dict
                 self._output['thiele_mod'] = self._r.rs.wc.thiele_mod
                 self._output['neff'] = self._r.rs.wc.neff
-                
-'''Reactor solver class using scikits.odes wrapper for SUNDIALS'''
-import scikits.odes.sundials.ida as ida
-import scikits.odes.sundials.cvode as cvode
 
-#Make it a subclass of ReactorSolver  
-class ReactorSolverScikits(ReactorSolverBase):
-    
-    def __init__(self,reactor,**params):
-        
-        #Initialize base solver class
-        ReactorSolverBase.__init__(self,reactor,**params)
-               
-        #### SOLVER PARAMETERS ####:  
-        self.iter_type = params.get('iter_type','NEWTON')  #Iteration method (NEWTON or 'FUNCTIONAL')
-        self.lmm_type = params.get('lmm_type','BDF')       #Discretization method (BDF or ADAMS)
-        
-        #Safety factor in the nonlinear convergence test
-        self.nonlin_conv_coef = params.get('nonlin_conv_coef',0.33)
-        
-        #Set up the linear solver from the following list:
-        #  ['dense' (= default), 'lapackdense', 'band', 'lapackband', 
-        #   'spgmr', 'spbcg', 'sptfqmr']
-        self.linsolver = params.get('linsolver','dense')
-        
-    def solve_ode(self):
-        
-        #Get initial conditions vector
-        self.init_conditions()
-        
-        #Instantiate reactor as ODE class
-        self._rode = ScikitsODE(self._r)
-        
-        #Instantiate the solver
-        self.solver = cvode.CVODE(self._rode.eval_ode,
-                                  atol = self.atol,
-                                  rtol = self.rtol,
-                                  order = self.order,
-                                  max_steps = self.max_steps,
-                                  lmm_type = self.lmm_type,
-                                  iter_type = self.iter_type,
-                                  linsolver = self.linsolver,
-                                  first_step_size = self.first_step_size,
-                                  min_step_size = self.min_step_size,
-                                  max_step_size = self.max_step_size,
-                                  max_conv_fails = self.max_conv_fails,
-                                  max_nonlin_iters = self.max_nonlin_iters,
-                                  bdf_stability_detection = self.bdf_stability,
-                                  old_api = False) 
-        
-        #Compute solution and return it along supplied axial coords.
-        self.sol = self.solver.solve(self._z, self.y0)
-        
-        #If an error occurs
-        if self.sol.errors.t != None:
-            raise ValueError(self.sol.message,self.sol.errors.t)
-    
-        #Get solution vector
-        self.values = self.sol.values.y
-
-    def solve_dae(self):
-        
-        #Get initial conditions vector
-        self.init_conditions()
-
-        #Instantiate reactor as DAE class
-        self._rdae = ScikitsDAE(self._r)
-                
-        #Initial derivatives vector
-        self.yd0 = np.zeros(len(self.y0))
-        
-        #Get list of differential and algebraic variables
-        varlist = np.ones(len(self.y0))
-           
-        #Set algebraic variables
-        varlist[self._rdae.p1:] = 0.0  
-        
-        #Instantiate the solver
-        self.solver = ida.IDA(self._rdae.eval_dae, 
-                              user_data = self._r,
-                              atol = self.atol,
-                              rtol = self.rtol,
-                              order = self.order,
-                              max_steps = self.max_steps,
-                              linsolver = self.linsolver,
-                              first_step_size = self.first_step_size,
-                              max_step_size = self.max_step_size,
-                              compute_initcond='yp0',
-                              compute_initcond_t0 = 1e-06,
-                              algebraic_vars_idx = np.where(varlist==0.0)[0],
-                              exclude_algvar_from_error = self.exclude_algvar_from_error,
-                              old_api=False)
-        
-        #Compute solution and return it along supplied axial coords.
-        self.sol = self.solver.solve(self._z, self.y0, self.yd0)
-        
-        #If an error occurs
-        if self.sol.errors.t != None:
-            raise ValueError(self.sol.message,self.sol.errors.t)
-    
-        #Get solution vector
-        self.values = self.sol.values.y
-                      
-'''Reactor solver class using ASSIMULO wrapper for SUNDIALS'''
-from assimulo.solvers import CVode, IDA
-
-#Make it a subclass of ReactorSolver  
-class ReactorSolverAssimulo(ReactorSolverBase):
-
-    def __init__(self,reactor,**params):
-        
-        #Initialize base solver class
-        ReactorSolverBase.__init__(self,reactor,**params)
-        
-        #### SOLVER PARAMETERS ####:
-        self.iter = params.get('iter','Newton') #Iteration method (Newton or FixedPoint)
-        self.discr = params.get('discr','BDF')  #Discretization method (BDF or Adams)
-        
-        #Set up the linear solver from the following list:
-        #  ['DENSE'(= default) or 'SPGMR']
-        self.linear_solver  = params.get('linear_solver','DENSE')
-        
-        #Boolean value to turn OFF Sundials LineSearch when calculating 
-        #initial conditions (IDA only)
-        self.lsoff = params.get('lsoff',False)
-        
-    def solve_ode(self):
-        
-        #Get initial conditions vector
-        self.init_conditions()
-
-        #Instantiate reactor as ODE class
-        self._rode = AssimuloODE(self._r,self._r.z_in,self.y0)  
-     
-        #Define the CVode solver
-        self.solver = CVode(self._rode) 
-        
-        #Solver parameters
-        self.solver.atol = self.atol         
-        self.solver.rtol = self.rtol         
-        self.solver.iter = self.iter
-        self.solver.discr = self.discr
-        self.solver.linear_solver = self.linear_solver
-        self.solver.maxord = self.order
-        self.solver.maxsteps = self.max_steps
-        self.solver.inith = self.first_step_size
-        self.solver.minh = self.min_step_size
-        self.solver.maxh = self.max_step_size
-        self.solver.maxncf = self.max_conv_fails
-        self.solver.maxnef = self.max_nonlin_iters
-        self.solver.stablimdet = self.bdf_stability
-        self.solver.verbosity = 50
-
-        #Solve the equations
-        z, self.values = self.solver.simulate(self._r.z_out,self.grid-1) 
-        
-        #Convert axial coordinates list to array
-        self._z = np.array(z)
-
-    def solve_dae(self):
-        
-        #Get initial conditions vector
-        self.init_conditions()
-        
-        #Initial derivatives vector
-        self.yd0 = np.zeros(len(self.y0))
-
-        #Instantiate reactor as DAE class
-        self._rdae = AssimuloDAE(self._r,self._r.z_in,
-                                       self.y0,self.yd0)
-        
-        #Get list of differential and algebraic variables
-        varlist = np.ones(len(self.y0))
-
-        #Set algebraic variables
-        varlist[self._rdae.p1:] = 0.0   
-               
-        #Set up the solver and its parameters
-        self.solver = IDA(self._rdae)
-        self.solver.atol = self.atol         
-        self.solver.rtol = self.rtol         
-        self.solver.linear_solver = self.linear_solver
-        self.solver.maxord = self.order
-        self.solver.maxsteps = self.max_steps
-        self.solver.inith = self.first_step_size
-        self.solver.maxh = self.max_step_size
-        self.solver.algvar = varlist
-        self.solver.make_consistent('IDA_YA_YDP_INIT')
-        self.solver.tout1 = 1e-06
-        self.solver.suppress_alg = self.exclude_algvar_from_error
-        self.solver.lsoff = self.lsoff
-        self.solver.verbosity = 50
-
-        #Solve the DAE equation system
-        z, self.values, self.valuesd = self.solver.simulate(self._r.z_out,
-                                                            self.grid-1)    
-        
-        #Convert axial coordinates list to array
-        self._z = np.array(z)
-        
 #ReactorSolver class to be instantiated in the simulations
 class ReactorSolver(object):
     
@@ -495,8 +297,12 @@ class ReactorSolver(object):
             self.solver = ReactorSolverScikits(reactor,**params)
             
         elif self.implementation == 'assimulo':
-            #Assimulo implementation
-            self.solver = ReactorSolverAssimulo(reactor,**params)
+            #Check if Assimulo package is installed           
+            if assimulo_found == True:
+                #Assimulo implementation
+                self.solver = ReactorSolverAssimulo(reactor,**params)
+            else:
+                raise ImportError('Assimulo module was not found')
             
     def solve(self):
         
@@ -709,3 +515,204 @@ class ReactorSolver(object):
             self.wg_mix_wc = self.solver._wg_mix_wc  #Gas-phase (washcoat) average molar mass [kg/kmol]
             self.Xwc = self.solver._Xwc              #Gas-phase (washcoat) molar fractions [-]
             self.Ywc = self.solver._Ywc              #Gas-phase (washcoat) mass fractions [-]
+               
+'''Reactor solver class using scikits.odes wrapper for SUNDIALS'''
+import scikits.odes.sundials.ida as ida
+import scikits.odes.sundials.cvode as cvode
+
+#Make it a subclass of ReactorSolver  
+class ReactorSolverScikits(ReactorSolverBase):
+    
+    def __init__(self,reactor,**params):
+        
+        #Initialize base solver class
+        ReactorSolverBase.__init__(self,reactor,**params)
+               
+        #### SOLVER PARAMETERS ####:  
+        self.iter_type = params.get('iter_type','NEWTON')  #Iteration method (NEWTON or 'FUNCTIONAL')
+        self.lmm_type = params.get('lmm_type','BDF')       #Discretization method (BDF or ADAMS)
+        
+        #Safety factor in the nonlinear convergence test
+        self.nonlin_conv_coef = params.get('nonlin_conv_coef',0.33)
+        
+        #Set up the linear solver from the following list:
+        #  ['dense' (= default), 'lapackdense', 'band', 'lapackband', 
+        #   'spgmr', 'spbcg', 'sptfqmr']
+        self.linsolver = params.get('linsolver','dense')
+        
+    def solve_ode(self):
+        
+        #Get initial conditions vector
+        self.init_conditions()
+        
+        #Instantiate reactor as ODE class
+        self._rode = ScikitsODE(self._r)
+        
+        #Instantiate the solver
+        self.solver = cvode.CVODE(self._rode.eval_ode,
+                                  atol = self.atol,
+                                  rtol = self.rtol,
+                                  order = self.order,
+                                  max_steps = self.max_steps,
+                                  lmm_type = self.lmm_type,
+                                  iter_type = self.iter_type,
+                                  linsolver = self.linsolver,
+                                  first_step_size = self.first_step_size,
+                                  min_step_size = self.min_step_size,
+                                  max_step_size = self.max_step_size,
+                                  max_conv_fails = self.max_conv_fails,
+                                  max_nonlin_iters = self.max_nonlin_iters,
+                                  bdf_stability_detection = self.bdf_stability,
+                                  old_api = False) 
+        
+        #Compute solution and return it along supplied axial coords.
+        self.sol = self.solver.solve(self._z, self.y0)
+        
+        #If an error occurs
+        if self.sol.errors.t != None:
+            raise ValueError(self.sol.message,self.sol.errors.t)
+    
+        #Get solution vector
+        self.values = self.sol.values.y
+
+    def solve_dae(self):
+        
+        #Get initial conditions vector
+        self.init_conditions()
+
+        #Instantiate reactor as DAE class
+        self._rdae = ScikitsDAE(self._r)
+                
+        #Initial derivatives vector
+        self.yd0 = np.zeros(len(self.y0))
+        
+        #Get list of differential and algebraic variables
+        varlist = np.ones(len(self.y0))
+           
+        #Set algebraic variables
+        varlist[self._rdae.p1:] = 0.0  
+        
+        #Instantiate the solver
+        self.solver = ida.IDA(self._rdae.eval_dae, 
+                              user_data = self._r,
+                              atol = self.atol,
+                              rtol = self.rtol,
+                              order = self.order,
+                              max_steps = self.max_steps,
+                              linsolver = self.linsolver,
+                              first_step_size = self.first_step_size,
+                              max_step_size = self.max_step_size,
+                              compute_initcond='yp0',
+                              compute_initcond_t0 = 1e-06,
+                              algebraic_vars_idx = np.where(varlist==0.0)[0],
+                              exclude_algvar_from_error = self.exclude_algvar_from_error,
+                              old_api=False)
+        
+        #Compute solution and return it along supplied axial coords.
+        self.sol = self.solver.solve(self._z, self.y0, self.yd0)
+        
+        #If an error occurs
+        if self.sol.errors.t != None:
+            raise ValueError(self.sol.message,self.sol.errors.t)
+    
+        #Get solution vector
+        self.values = self.sol.values.y
+        
+'''Reactor solver class using ASSIMULO wrapper for SUNDIALS'''           
+if assimulo_found == True:                   
+    from plug.reactor.flow_reactor import AssimuloODE, AssimuloDAE
+    from assimulo.solvers import CVode, IDA
+    
+    #Make it a subclass of ReactorSolver  
+    class ReactorSolverAssimulo(ReactorSolverBase):
+    
+        def __init__(self,reactor,**params):
+            
+            #Initialize base solver class
+            ReactorSolverBase.__init__(self,reactor,**params)
+            
+            #### SOLVER PARAMETERS ####:
+            self.iter = params.get('iter','Newton') #Iteration method (Newton or FixedPoint)
+            self.discr = params.get('discr','BDF')  #Discretization method (BDF or Adams)
+            
+            #Set up the linear solver from the following list:
+            #  ['DENSE'(= default) or 'SPGMR']
+            self.linear_solver  = params.get('linear_solver','DENSE')
+            
+            #Boolean value to turn OFF Sundials LineSearch when calculating 
+            #initial conditions (IDA only)
+            self.lsoff = params.get('lsoff',False)
+            
+        def solve_ode(self):
+            
+            #Get initial conditions vector
+            self.init_conditions()
+    
+            #Instantiate reactor as ODE class
+            self._rode = AssimuloODE(self._r,self._r.z_in,self.y0)  
+         
+            #Define the CVode solver
+            self.solver = CVode(self._rode) 
+            
+            #Solver parameters
+            self.solver.atol = self.atol         
+            self.solver.rtol = self.rtol         
+            self.solver.iter = self.iter
+            self.solver.discr = self.discr
+            self.solver.linear_solver = self.linear_solver
+            self.solver.maxord = self.order
+            self.solver.maxsteps = self.max_steps
+            self.solver.inith = self.first_step_size
+            self.solver.minh = self.min_step_size
+            self.solver.maxh = self.max_step_size
+            self.solver.maxncf = self.max_conv_fails
+            self.solver.maxnef = self.max_nonlin_iters
+            self.solver.stablimdet = self.bdf_stability
+            self.solver.verbosity = 50
+    
+            #Solve the equations
+            z, self.values = self.solver.simulate(self._r.z_out,self.grid-1) 
+            
+            #Convert axial coordinates list to array
+            self._z = np.array(z)
+    
+        def solve_dae(self):
+            
+            #Get initial conditions vector
+            self.init_conditions()
+            
+            #Initial derivatives vector
+            self.yd0 = np.zeros(len(self.y0))
+    
+            #Instantiate reactor as DAE class
+            self._rdae = AssimuloDAE(self._r,self._r.z_in,
+                                           self.y0,self.yd0)
+            
+            #Get list of differential and algebraic variables
+            varlist = np.ones(len(self.y0))
+    
+            #Set algebraic variables
+            varlist[self._rdae.p1:] = 0.0   
+                   
+            #Set up the solver and its parameters
+            self.solver = IDA(self._rdae)
+            self.solver.atol = self.atol         
+            self.solver.rtol = self.rtol         
+            self.solver.linear_solver = self.linear_solver
+            self.solver.maxord = self.order
+            self.solver.maxsteps = self.max_steps
+            self.solver.inith = self.first_step_size
+            self.solver.maxh = self.max_step_size
+            self.solver.algvar = varlist
+            self.solver.make_consistent('IDA_YA_YDP_INIT')
+            self.solver.tout1 = 1e-06
+            self.solver.suppress_alg = self.exclude_algvar_from_error
+            self.solver.lsoff = self.lsoff
+            self.solver.verbosity = 50
+    
+            #Solve the DAE equation system
+            z, self.values, self.valuesd = self.solver.simulate(self._r.z_out,
+                                                                self.grid-1)    
+            
+            #Convert axial coordinates list to array
+            self._z = np.array(z)

@@ -38,7 +38,7 @@ X_in['N2'] = 1.0-np.sum(np.fromiter(X_in.values(),dtype=float))
 
 #Set the temperature range [K]
 Trange = [T_in] 
-Trange = list(np.linspace(273.15+330,273.15+900,20))
+#Trange = list(np.linspace(273.15+330,273.15+900,20))
 
 #Set up equilibrium gas phase
 gas_eq = ct.Solution(input_file)

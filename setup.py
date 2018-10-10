@@ -15,7 +15,7 @@ setup(name='plug',
       author_email='tpcarvalho2@gmail.com',
       license=license,
       packages=['plug','plug.reactor','plug.kinetics','plug.utils'],
-      install_requires=['numpy','scipy','sklearn','Assimulo'],
+      install_requires=['numpy','scipy','sklearn'],
       zip_safe=False,    
       classifiers=[
         "Programming Language :: Python :: 3",

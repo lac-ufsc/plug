@@ -9,11 +9,11 @@ In addition to the PFR model, Plug also contains a modified implementation of th
 which adds the option of having coverage-dependent enthalpy for surface species. Lastly, it comes with some utility functions 
 for mechanism reduction, such as PCA for example.
 
-This package relies on either Assimulo (https://jmodelica.org/assimulo/) or scikits.odes (https://github.com/bmcage/odes) solver packages. Please, refer to the links for more information.
+This package relies on either Assimulo (https://jmodelica.org/assimulo/) or scikits.odes (https://github.com/bmcage/odes) solver packages. Please, refer to the links for more information about their installation.
 
 # Installation
 
-The current version of Plug is still preliminary. It can be installed locally on your machine by the command 'pip install -e .' within the folder where setup.py is located. There are some packages dependencies which are listed below. Numpy, Scipy, Sklearn and Assimulo are handled automatically if setup.py is run. Cantera and scikits.odes must be installed manually by the user. Additionally, the user must have installed the Sundials 2.7.0 library (https://computation.llnl.gov/projects/sundials).
+The current version of Plug is still preliminary, and has been tested in Python 3.5 and 3.6. It can be installed locally on your machine by the command 'pip install -e .' within the folder where setup.py is located. There are some packages dependencies which are listed below. Numpy, Scipy and Sklearn are handled automatically if setup.py is run. Cantera, scikits.odes and Assimulo must be installed manually by the user. Additionally, the user must have installed the Sundials 2.7.0 library (https://computation.llnl.gov/projects/sundials).
 
 Package requirements:
 
@@ -21,8 +21,8 @@ Package requirements:
 * scipy
 * cantera
 * sklearn
-* assimulo
 * scikits.odes
+* assimulo (optional)
 
 In order to use the input files provided with the code along with Cantera, it is necessary to add the data directory to Cantera's search path, e.g.: export CANTERA_DATA="/your-folder/plug/data/:$CANTERA_DATA"
 
@@ -30,7 +30,7 @@ In order to use the input files provided with the code along with Cantera, it is
 
 ## PFR with homogeneous reactions
 
-A simple example solving a PFR problem of hydrogen-oxygen combustion. This example was taken from Cantera's documentation (https://cantera.org/documentation/docs-2.3/sphinx/html/cython/examples/reactors_pfr.html).
+A simple example solving a PFR problem of hydrogen-oxygen combustion. This example tries to reproduce the one from Cantera's documentation (https://cantera.org/documentation/docs-2.3/sphinx/html/cython/examples/reactors_pfr.html).
 
     import cantera as ct
     import numpy as np
@@ -108,7 +108,7 @@ A simple example solving a PFR problem of hydrogen-oxygen combustion. This examp
     
 ## PFR with heterogeneous reactions
 
-This example solves a plug flow reactor problem, where the chemistry is surface chemistry. The specific problem simulated is the partial oxidation of methane over a platinum catalyst in a packed bed reactor. This example was taken from Cantera's documentation (https://cantera.org/documentation/docs-2.3/sphinx/html/cython/examples/reactors_surf_pfr.html).
+This example solves a plug flow reactor problem, where the chemistry is surface chemistry. The specific problem simulated is the partial oxidation of methane over a platinum catalyst in a packed bed reactor. This example tries to reproduce the one from Cantera's documentation (https://cantera.org/documentation/docs-2.3/sphinx/html/cython/examples/reactors_surf_pfr.html).
 
     import cantera as ct
     import numpy as np

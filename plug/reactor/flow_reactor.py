@@ -1,5 +1,7 @@
 import numpy as np
-from assimulo.problem import Explicit_Problem, Implicit_Problem
+import importlib
+assimulo_spec = importlib.util.find_spec('assimulo')
+assimulo_found = assimulo_spec is not None
 
 class FlowReactorBase(object):
     '''########################################################################
@@ -585,94 +587,99 @@ class ScikitsDAE(object):
             #Add to output residuals
             res[self.p3:] = np.hstack((self._r.rs.wc.resy_flat,
                                        self._r.rs.wc.rescovs_flat))            
-                       
-class AssimuloODE(Explicit_Problem):
-    '''Class that defindes the PFR as a ODE system for ASSIMULO package'''     
-    def __init__(self,reactor,t0, y0):
-        
-        #Make reference to reactor object
-        self._r = reactor
-    
-        #Initial conditions
-        self.t0 = t0
-        self.y0 = y0
-        
-        #Create output array
-        self.yout = np.zeros_like(self.y0)
-        
-        #Array slicing pointers
-        self.p1 = self._r.aux1
-        
-        #Only if there is a reacting wall
-        if self._r.rs != None:
-            self.p2 = self._r.rs.aux2
-        
-    def rhs(self,z,y):
-        
-        #Evaluate reactor conservation equations
-        self._r.eval_equations(z,y)
-       
-        #Check if reactor has reacting walls
-        if self._r.rs != None:
 
-            #Evaluate coverages w/ pseudo-velocity term
-            self._r.rs.eval_theta()
+#Check if Assimulo package is installed            
+if assimulo_found == True:
+    from assimulo.problem import Explicit_Problem, Implicit_Problem
+                         
+    class AssimuloODE(Explicit_Problem):
+        '''Class that defindes the PFR as a ODE system for ASSIMULO package'''     
+        def __init__(self,reactor,t0, y0):
             
-            #Add coverages to output vector
-            self.yout[self.p1:self.p2] = self._r.rs.dthetadz
-                      
-        #Output vector
-        self.yout[0] = self._r.dtdz
-        self.yout[1] = self._r.dmdz
-        self.yout[2] = self._r.dTdz
-        self.yout[3] = self._r.dPdz
-        self.yout[4:self.p1] = self._r.dYdz[:-1]
+            #Make reference to reactor object
+            self._r = reactor
+        
+            #Initial conditions
+            self.t0 = t0
+            self.y0 = y0
             
-        return self.yout
+            #Create output array
+            self.yout = np.zeros_like(self.y0)
+            
+            #Array slicing pointers
+            self.p1 = self._r.aux1
+            
+            #Only if there is a reacting wall
+            if self._r.rs != None:
+                self.p2 = self._r.rs.aux2
+            
+        def rhs(self,z,y):
+            
+            #Evaluate reactor conservation equations
+            self._r.eval_equations(z,y)
+           
+            #Check if reactor has reacting walls
+            if self._r.rs != None:
     
-class AssimuloDAE(Implicit_Problem):
-    '''Class that defindes the PFR as a ODE system for ASSIMULO package'''     
-    def __init__(self,reactor,t0,y0,yd0):
-        
-        #Make reference to reactor object
-        self._r = reactor
-    
-        #Initial conditions
-        self.t0 = t0
-        self.y0 = y0
-        self.yd0 = yd0
-    
-        #Create output array
-        self.rout = np.zeros_like(self.y0)
-        
-        #Array slicing pointers
-        self.p1 = self._r.aux1
-        self.p2 = self._r.rs.aux2
-        self.p3 = self._r.rs.aux3
-
-    def res(self, z, y, yd):
-        
-        #Evaluate reactor conservation equations
-        self._r.eval_as_dae(z,y,yd)
+                #Evaluate coverages w/ pseudo-velocity term
+                self._r.rs.eval_theta()
                 
-        #Vector with residuals
-        self.rout[0] = self._r.rest
-        self.rout[1] = self._r.resm
-        self.rout[2] = self._r.resT
-        self.rout[3] = self._r.resP
-        self.rout[4:self.p1] = self._r.resY
-        self.rout[self.p1:self.p2] = self._r.rs.restheta
-
-        #If external mass transfer is consided
-        if self._r.flag_ext_mt == 1:
-
-            #Add to output residuals
-            self.rout[self.p2:self.p3] = self._r.rs.resYs[:-1]
+                #Add coverages to output vector
+                self.yout[self.p1:self.p2] = self._r.rs.dthetadz
+                          
+            #Output vector
+            self.yout[0] = self._r.dtdz
+            self.yout[1] = self._r.dmdz
+            self.yout[2] = self._r.dTdz
+            self.yout[3] = self._r.dPdz
+            self.yout[4:self.p1] = self._r.dYdz[:-1]
+                
+            return self.yout
+        
+    class AssimuloDAE(Implicit_Problem):
+        '''Class that defindes the PFR as a ODE system for ASSIMULO package'''     
+        def __init__(self,reactor,t0,y0,yd0):
             
-        #If detailed washcoat model is employed
-        if self._r.rs.flag_int_mt == 2:   
-
-            #Add to output residuals
-            self.rout[self.p3:] = np.hstack((self._r.rs.wc.resy_flat,
-                                             self._r.rs.wc.rescovs_flat))                 
-        return self.rout
+            #Make reference to reactor object
+            self._r = reactor
+        
+            #Initial conditions
+            self.t0 = t0
+            self.y0 = y0
+            self.yd0 = yd0
+        
+            #Create output array
+            self.rout = np.zeros_like(self.y0)
+            
+            #Array slicing pointers
+            self.p1 = self._r.aux1
+            self.p2 = self._r.rs.aux2
+            self.p3 = self._r.rs.aux3
+    
+        def res(self, z, y, yd):
+            
+            #Evaluate reactor conservation equations
+            self._r.eval_as_dae(z,y,yd)
+                    
+            #Vector with residuals
+            self.rout[0] = self._r.rest
+            self.rout[1] = self._r.resm
+            self.rout[2] = self._r.resT
+            self.rout[3] = self._r.resP
+            self.rout[4:self.p1] = self._r.resY
+            self.rout[self.p1:self.p2] = self._r.rs.restheta
+    
+            #If external mass transfer is consided
+            if self._r.flag_ext_mt == 1:
+    
+                #Add to output residuals
+                self.rout[self.p2:self.p3] = self._r.rs.resYs[:-1]
+                
+            #If detailed washcoat model is employed
+            if self._r.rs.flag_int_mt == 2:   
+    
+                #Add to output residuals
+                self.rout[self.p3:] = np.hstack((self._r.rs.wc.resy_flat,
+                                                 self._r.rs.wc.rescovs_flat))                 
+            return self.rout
+        
