@@ -9,11 +9,11 @@ In addition to the PFR model, Plug also contains a modified implementation of th
 which adds the option of having coverage-dependent enthalpy for surface species. Lastly, it comes with some utility functions 
 for mechanism reduction, such as PCA for example.
 
-This package relies on either Assimulo (https://jmodelica.org/assimulo/) or scikits.odes (https://github.com/bmcage/odes) solver packages. Please, refer to the links for more information about their installation.
+This package relies on either scikits.odes (https://github.com/bmcage/odes) or Assimulo (https://jmodelica.org/assimulo/) solver packages. Please, refer to the links for more information about their installation.
 
 # Installation
 
-The current version of Plug is still preliminary, and has been tested in Python 3.5 and 3.6. It can be installed locally on your machine by the command 'pip install -e .' within the folder where setup.py is located. There are some packages dependencies which are listed below. Numpy, Scipy and Sklearn are handled automatically if setup.py is run. Cantera, scikits.odes and Assimulo must be installed manually by the user. Additionally, the user must have installed the Sundials 2.7.0 library (https://computation.llnl.gov/projects/sundials).
+Note that Plug is a work in progress and the current version is preliminary. It has been tested in Linux using Python 3.5 and 3.6. It can be installed locally on your machine by the command 'pip install -e .' within the folder where setup.py is located. There are some packages dependencies which are listed below. Numpy, Scipy and Sklearn are handled automatically if setup.py is run. Cantera, scikits.odes and Assimulo must be installed manually by the user. Additionally, the user must have installed the Sundials 2.7.0 library (https://computation.llnl.gov/projects/sundials). Installation of Assimulo is optional, and the code should run using only scikits.odes.
 
 Package requirements:
 
