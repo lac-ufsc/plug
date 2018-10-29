@@ -1,14 +1,14 @@
 units(length='m', time='s', quantity='kmol', act_energy='J/kmol')
 
 ideal_gas(name='gas',
-          elements="Ar H Pt C He O",
-          species="""CH3CH2OH CH3CHO CH2CH2 CH4 H2O CO CO2 H2 AR HE""",
+          elements="N H Pt C He O",
+          species="""CH3CH2OH CH3CHO CH2CH2 CH4 H2O CO CO2 H2 N2 HE""",
           reactions='gas-*',
           transport='Mix',
           initial_state=state(temperature=300.0, pressure=OneAtm))
 
 ideal_interface(name='Pt_surface',
-                elements="Ar H Pt C He O",
+                elements="N H Pt C He O",
                 species="""PT(S) CH3CH2OH(S) CH3CHOH(S) CH3COH(S) CH3CH2O(S) CH3CO(S) CO(S) CH3(S) CH2(S) CH(S) C(S) H2O(S) OH(S) H(S) CO2(S) COOH(S) CH2CH2OH(S) CH2COH(S) CH3CHO(S) CH2CO(S) CHCO(S) CH2CH2(S) CH2CH(S) CHCH(S)""",
                 site_density=2.49081e-08,
                 phases="gas",
@@ -152,20 +152,22 @@ species(name='H2',
                                 rot_relax=280.0),
         size=1.0)
 
-species(name='AR',
-        atoms='Ar:1',
+species(name='N2',
+        atoms='N:2',
         thermo=(NASA([300.00, 1000.00],
-                     [ 2.50000000E+00,  0.00000000E+00,  0.00000000E+00,
-                       0.00000000E+00,  0.00000000E+00, -7.45375000E+02,
-                       4.36600000E+00]),
+                     [ 3.29867700E+00,  1.40824000E-03, -3.96322200E-06,
+                       5.64151500E-09, -2.44485500E-12, -1.02090000E+03,
+                       3.95037200E+00]),
                 NASA([1000.00, 5000.00],
-                     [ 2.50000000E+00,  0.00000000E+00,  0.00000000E+00,
-                       0.00000000E+00,  0.00000000E+00, -7.45375000E+02,
-                       4.36600000E+00])),
-        transport=gas_transport(geom='atom',
-                                diam=3.330,
-                                well_depth=136.50),
-        size=1.0)
+                     [ 2.92664000E+00,  1.48797700E-03, -5.68476100E-07,
+                       1.00970400E-10, -6.75335100E-15, -9.22797700E+02,
+                       5.98052800E+00])),
+        transport=gas_transport(geom='linear',
+                                diam=3.621,
+                                well_depth=97.53,
+                                polar=1.76,
+                                rot_relax=4.0),
+        note='121286')
 
 species(name='HE',
         atoms='He:1',
